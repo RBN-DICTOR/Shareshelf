@@ -24,10 +24,18 @@ export function Reveal({
 }
 
 export function Headline({ text, className = '' }: { text: string; className?: string }) {
+  const words = text.split(' ');
   return (
-    <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[var(--navy)] ${className}`}>
-      {text.split(' ').map((word, idx) => (
-        <span key={`${word}-${idx}`} className="inline-block overflow-hidden align-bottom">
+    <h1
+      className={`text-[32px] leading-[1.06] sm:text-5xl md:text-6xl lg:text-7xl text-[var(--navy)] [text-wrap:balance] ${className}`}
+    >
+      {words.map((word, idx) => (
+        <span
+          key={`${word}-${idx}`}
+          className={`inline-block overflow-hidden align-bottom ${
+            idx < words.length - 1 ? 'mr-[0.26em]' : ''
+          }`}
+        >
           <motion.span
             className="inline-block"
             initial={{ y: '110%' }}
@@ -38,7 +46,7 @@ export function Headline({ text, className = '' }: { text: string; className?: s
               ease: [0.22, 1, 0.36, 1],
             }}
           >
-            {word}&nbsp;
+            {word}
           </motion.span>
         </span>
       ))}

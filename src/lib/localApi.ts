@@ -1,6 +1,7 @@
 import type {
   BorrowRequest,
   BorrowRequestStatus,
+  ChatMessage,
   CommunityImpact,
   Item,
   ItemBusyDate,
@@ -257,4 +258,27 @@ export async function localMarkAllNotificationsRead(): Promise<void> {
 
 export async function localFetchCommunityImpact(): Promise<CommunityImpact> {
   return apiRequest<CommunityImpact>('/impact');
+}
+
+export async function localFetchChatMessages(): Promise<ChatMessage[]> {
+  return apiRequest<ChatMessage[]>('/messages');
+}
+
+export async function localSendChatMessage(input: {
+  recipient_id: string;
+  item_id?: string | null;
+  request_id?: string | null;
+  message: string;
+}): Promise<ChatMessage> {
+  return apiRequest<ChatMessage>('/messages', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function localMarkThreadRead(threadKey: string): Promise<void> {
+  await apiRequest<{ ok: boolean }>('/messages/thread/read', {
+    method: 'PATCH',
+    body: JSON.stringify({ thread_key: threadKey }),
+  });
 }

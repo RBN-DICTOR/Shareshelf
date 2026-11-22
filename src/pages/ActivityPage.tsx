@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { LayoutGroup, motion } from 'framer-motion';
-import { Edit3, PackagePlus, Plus, Trash2, UserCheck } from 'lucide-react';
+import { Edit3, MessageCircle, PackagePlus, Plus, Trash2, UserCheck } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { ItemThumbnail } from '../components/ItemThumbnail';
@@ -9,6 +9,7 @@ import { Page } from '../components/Motion';
 import { EmptyShelfState } from '../components/ShelfLine';
 import { Stepper } from '../components/Stepper';
 import { useAuth } from '../hooks/useAuth';
+import { useChat } from '../hooks/useChat';
 import { useShareShelfData } from '../hooks/useShareShelfData';
 import { formatDateRange, getFirstName, getStatusLabel } from '../lib/format';
 import type { BorrowRequest, BorrowRequestStatus, Item } from '../types';
@@ -48,6 +49,7 @@ function getStatusBadgeClasses(status: BorrowRequestStatus): string {
 
 export function ActivityPage({ onOpenShareModal, onEditItem }: ActivityPageProps) {
   const { user, profile, openAuthModal } = useAuth();
+  const { openChatWith } = useChat();
   const {
     items,
     requests,
@@ -349,6 +351,31 @@ export function ActivityPage({ onOpenShareModal, onEditItem }: ActivityPageProps
                   Cancel request
                 </Button>
               )}
+
+              {otherPerson && otherPerson.id !== user.id && (
+                <Button
+                  variant="ghost"
+                  onClick={() =>
+                    openChatWith({
+                      recipient: otherPerson,
+                      item: req.item
+                        ? {
+                            id: req.item.id,
+                            name: req.item.name,
+                            image_url: req.item.image_url,
+                            category: req.item.category,
+                            neighborhood: req.item.neighborhood,
+                          }
+                        : null,
+                      requestId: req.id,
+                    })
+                  }
+                  className="ml-auto"
+                >
+                  <MessageCircle className="h-4 w-4 text-[var(--blue)]" aria-hidden="true" />
+                  Chat with {getFirstName(otherPerson.full_name)}
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -376,7 +403,7 @@ export function ActivityPage({ onOpenShareModal, onEditItem }: ActivityPageProps
   };
 
   return (
-    <Page className="mx-auto max-w-6xl px-4 py-8 pb-24 sm:px-6 lg:px-8 lg:pb-16">
+    <Page className="mx-auto max-w-6xl px-4 py-8 pb-28 sm:px-6 lg:px-8 lg:pb-16">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -468,10 +495,10 @@ export function ActivityPage({ onOpenShareModal, onEditItem }: ActivityPageProps
                     key={item.id}
                     className="flex flex-col justify-between rounded-3xl border border-[var(--line)] bg-white p-4 shadow-[var(--shadow)] sm:p-5"
                   >
-                    <div className="flex gap-4">
+                    <div className="flex gap-3 sm:gap-4">
                       <Link
                         to={`/item/${item.id}`}
-                        className="w-28 shrink-0 overflow-hidden rounded-2xl border border-[var(--line)]"
+                        className="w-20 shrink-0 overflow-hidden rounded-2xl border border-[var(--line)] sm:w-28"
                       >
                         <ItemThumbnail
                           imageUrl={item.image_url}

@@ -8,12 +8,14 @@ import {
   Inbox,
   LayoutList,
   LogOut,
+  MessageCircle,
   Plus,
   Sparkles,
   User as UserIcon,
 } from 'lucide-react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { DEMO_USERS, useAuth } from '../hooks/useAuth';
+import { useChat } from '../hooks/useChat';
 import { useShareShelfData } from '../hooks/useShareShelfData';
 import { getInitials } from '../lib/format';
 import { Button } from './Button';
@@ -34,6 +36,7 @@ const DESKTOP_LINKS = [
 export function Navbar({ onOpenShareModal }: NavbarProps) {
   const { user, profile, isDemoAccount, demoRole, switchDemoUser, signOut, openAuthModal } =
     useAuth();
+  const { unreadMessagesCount, openInbox } = useChat();
   const { actionCount, unreadNotificationsCount } = useShareShelfData();
   const navigate = useNavigate();
   const location = useLocation();
@@ -138,13 +141,13 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
   return (
     <>
       {/* Desktop & Slim Mobile Top Bar */}
-      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--cream)]/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-          <div className="flex items-center gap-2.5 shrink-0">
+      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--cream)]/90 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6">
+          <div className="flex min-w-0 items-center gap-2.5 shrink-0">
             <Link to="/" className="inline-flex items-center rounded-xl">
-              <Logo size={32} />
+              <Logo size={30} />
             </Link>
-            <span className="hidden sm:inline-block rounded-full border border-[var(--line)] bg-white px-2.5 py-0.5 text-[11px] font-bold text-[var(--muted)] whitespace-nowrap">
+            <span className="hidden md:inline-block rounded-full border border-[var(--line)] bg-white px-2.5 py-0.5 text-[11px] font-bold text-[var(--muted)] whitespace-nowrap">
               Prototype demo
             </span>
           </div>
@@ -189,7 +192,7 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
             </nav>
           </LayoutGroup>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <Button
               variant="orange"
               onClick={handleShareClick}
@@ -198,6 +201,25 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
               Share an item
             </Button>
 
+            {/* Inbuilt Neighbor Messages */}
+            <button
+              type="button"
+              onClick={() => {
+                setNotifOpen(false);
+                setMenuOpen(false);
+                openInbox();
+              }}
+              aria-label="Neighbor messages"
+              className="relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-[var(--line)] bg-white text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)]"
+            >
+              <MessageCircle className="h-4 w-4" aria-hidden="true" />
+              {user && unreadMessagesCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--blue)] px-1 text-[11px] font-extrabold text-white tabular-nums ring-2 ring-[var(--cream)]">
+                  {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                </span>
+              )}
+            </button>
+
             {/* Notifications Bell */}
             <div className="relative">
               <button
@@ -205,7 +227,7 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
                 onClick={handleNotificationsClick}
                 aria-label="Notifications"
                 aria-expanded={notifOpen}
-                className="relative flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line)] bg-white text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)]"
+                className="relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-[var(--line)] bg-white text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)]"
               >
                 <Bell className="h-4 w-4" aria-hidden="true" />
                 {user && unreadNotificationsCount > 0 && (
@@ -228,7 +250,7 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
                   }}
                   aria-label="Account menu"
                   aria-expanded={menuOpen}
-                  className="flex h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-white pl-1.5 pr-3 text-sm font-bold text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)]"
+                  className="flex h-10 sm:h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-white pl-1 pr-1 sm:pl-1.5 sm:pr-3 text-sm font-bold text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)]"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--blue)] text-xs font-extrabold text-white">
                     {getInitials(displayName)}
@@ -278,6 +300,26 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
                           role="menuitem"
                           onClick={() => {
                             setMenuOpen(false);
+                            openInbox();
+                          }}
+                          className="flex w-full items-center justify-between gap-2.5 px-4 py-2.5 text-left text-sm font-semibold text-[var(--navy)] hover:bg-[var(--sun-soft)]/50"
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <MessageCircle className="h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
+                            <span>Messages</span>
+                          </span>
+                          {unreadMessagesCount > 0 && (
+                            <span className="rounded-full bg-[var(--blue)] px-2 py-0.5 text-[11px] font-extrabold text-white tabular-nums">
+                              {unreadMessagesCount}
+                            </span>
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuOpen(false);
                             navigate('/activity');
                           }}
                           className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-semibold text-[var(--navy)] hover:bg-[var(--sun-soft)]/50"
@@ -307,7 +349,7 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
               <button
                 type="button"
                 onClick={() => openAuthModal()}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-bold text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)] whitespace-nowrap shrink-0"
+                className="inline-flex min-h-[40px] sm:min-h-[44px] items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)] whitespace-nowrap shrink-0"
               >
                 <UserIcon className="h-4 w-4 text-[var(--blue)]" aria-hidden="true" />
                 <span>Sign in</span>

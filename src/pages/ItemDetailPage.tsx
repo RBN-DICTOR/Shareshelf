@@ -107,7 +107,7 @@ export function ItemDetailPage({ onOpenShareModal, onEditItem }: ItemDetailPageP
 
   // Mobile full-page layout
   return (
-    <Page className="min-h-[calc(100dvh-64px)] bg-white pb-24">
+    <Page className="min-h-[calc(100dvh-64px)] bg-white pb-28">
       <div className="border-b border-[var(--line)] bg-[var(--cream)] px-4 py-3">
         <button
           type="button"

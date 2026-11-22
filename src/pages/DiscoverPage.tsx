@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X } from 'lucide-react';
+import { LayoutGroup, motion, AnimatePresence } from 'framer-motion';
+import { MapPin, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { CategoryChips } from '../components/CategoryChips';
@@ -25,7 +25,7 @@ const LOOP_STEPS = [
 
 export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
   const navigate = useNavigate();
-  const { user, openAuthModal } = useAuth();
+  const { user, profile, openAuthModal } = useAuth();
   const { items, busyDates, loadingItems } = useShareShelfData();
 
   const [search, setSearch] = useState('');
@@ -51,13 +51,31 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
 
   const safeItems = useMemo(() => (Array.isArray(items) ? items : []), [items]);
 
-  const neighborhoods = useMemo(() => {
-    const set = new Set<string>();
+  const neighborhoodCounts = useMemo(() => {
+    const counts = new Map<string, number>();
     safeItems.forEach((it) => {
-      if (it.neighborhood?.trim()) set.add(it.neighborhood.trim());
+      const hood = it.neighborhood?.trim();
+      if (hood) {
+        counts.set(hood, (counts.get(hood) || 0) + 1);
+      }
     });
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [safeItems]);
+    const myHood = profile?.neighborhood?.trim().toLowerCase() || '';
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({
+        name,
+        count,
+        isMine: Boolean(myHood && name.toLowerCase() === myHood),
+      }))
+      .sort((a, b) => {
+        if (a.isMine !== b.isMine) return a.isMine ? -1 : 1;
+        return a.name.localeCompare(b.name);
+      });
+  }, [profile?.neighborhood, safeItems]);
+
+  const neighborhoods = useMemo(
+    () => neighborhoodCounts.map((n) => n.name),
+    [neighborhoodCounts]
+  );
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -114,7 +132,7 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
   };
 
   return (
-    <div className="pb-24 lg:pb-16">
+    <div className="pb-28 lg:pb-16">
       {/* v2 Hero */}
       <Hero
         items={items}
@@ -228,12 +246,12 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
                 value={selectedNeighborhood}
                 onChange={(e) => setSelectedNeighborhood(e.target.value)}
                 aria-label="Filter by neighborhood"
-                className="min-h-[44px] flex-1 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-bold text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:flex-initial"
+                className="min-h-[44px] min-w-0 flex-1 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-bold text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:flex-initial"
               >
-                <option value="All">All neighborhoods</option>
-                {neighborhoods.map((hood) => (
-                  <option key={hood} value={hood}>
-                    {hood}
+                <option value="All">All neighborhoods ({safeItems.length})</option>
+                {neighborhoodCounts.map((hood) => (
+                  <option key={hood.name} value={hood.name}>
+                    {hood.name} ({hood.count})
                   </option>
                 ))}
               </select>
@@ -243,7 +261,7 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
                 role="switch"
                 aria-checked={availableOnly}
                 onClick={() => setAvailableOnly((v) => !v)}
-                className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors ${
+                className={`inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold whitespace-nowrap transition-colors ${
                   availableOnly
                     ? 'border-[var(--sun)] bg-[var(--sun)] text-[var(--navy)]'
                     : 'border-[var(--line)] bg-white text-[var(--navy)] hover:bg-[var(--sun-soft)]'
@@ -260,8 +278,84 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
             </div>
           </div>
 
+          {/* Interactive Neighborhood Filter Bar */}
+          {neighborhoods.length > 0 && (
+            <LayoutGroup id="discover-neighborhoods">
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-flex shrink-0 items-center gap-1 text-xs font-extrabold text-[var(--muted)]">
+                  <MapPin className="h-3.5 w-3.5 text-[var(--orange)]" aria-hidden="true" />
+                  Neighborhood:
+                </span>
+                <div
+                  role="tablist"
+                  aria-label="Filter goods by neighborhood"
+                  className="no-scrollbar flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={selectedNeighborhood === 'All'}
+                    onClick={() => setSelectedNeighborhood('All')}
+                    className="relative inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 text-xs font-bold whitespace-nowrap transition-colors hover:bg-[var(--sun-soft)]/50"
+                  >
+                    {selectedNeighborhood === 'All' && (
+                      <motion.span
+                        layoutId="hood-chip"
+                        className="absolute inset-0 rounded-full bg-[var(--navy)]"
+                        transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                      />
+                    )}
+                    <span
+                      className={`relative inline-flex items-center gap-1.5 ${
+                        selectedNeighborhood === 'All' ? 'text-white' : 'text-[var(--navy)]'
+                      }`}
+                    >
+                      <MapPin className="h-3.5 w-3.5 sm:hidden" aria-hidden="true" />
+                      <span>All neighborhoods</span>
+                      <span className="opacity-75 tabular-nums">({safeItems.length})</span>
+                    </span>
+                  </button>
+
+                  {neighborhoodCounts.map((hood) => {
+                    const active = selectedNeighborhood === hood.name;
+                    return (
+                      <button
+                        key={hood.name}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        onClick={() => setSelectedNeighborhood(hood.name)}
+                        className="relative inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 text-xs font-bold whitespace-nowrap transition-colors hover:bg-[var(--sun-soft)]/50"
+                      >
+                        {active && (
+                          <motion.span
+                            layoutId="hood-chip"
+                            className="absolute inset-0 rounded-full bg-[var(--navy)]"
+                            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                          />
+                        )}
+                        <span
+                          className={`relative inline-flex items-center gap-1.5 ${
+                            active ? 'text-white' : 'text-[var(--navy)]'
+                          }`}
+                        >
+                          <MapPin
+                            className={`h-3 w-3 ${active ? 'text-[var(--sun)]' : 'text-[var(--orange)]'}`}
+                            aria-hidden="true"
+                          />
+                          <span>{hood.isMine ? `${hood.name} (Near you)` : hood.name}</span>
+                          <span className="opacity-75 tabular-nums">({hood.count})</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </LayoutGroup>
+          )}
+
           {/* Animated CategoryChips */}
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <CategoryChips
                 id="discover-categories"
@@ -275,7 +369,7 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="shrink-0 text-xs font-extrabold text-[var(--blue)] hover:underline"
+                className="shrink-0 whitespace-nowrap text-xs font-extrabold text-[var(--blue)] hover:underline"
               >
                 Clear filters
               </button>

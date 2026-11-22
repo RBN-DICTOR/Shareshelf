@@ -36,6 +36,7 @@ export function WantedPage() {
   } = useShareShelfData();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>('All');
   const [showFulfilled, setShowFulfilled] = useState(false);
 
   // Create want modal state
@@ -62,13 +63,22 @@ export function WantedPage() {
     [wants, activeWantId]
   );
 
+  const wantNeighborhoods = useMemo(() => {
+    const set = new Set<string>();
+    wants.forEach((w) => {
+      if (w.neighborhood?.trim()) set.add(w.neighborhood.trim());
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [wants]);
+
   const filteredWants = useMemo(() => {
     return wants.filter((w) => {
       if (!showFulfilled && w.status !== 'open') return false;
       if (selectedCategory !== 'All' && w.category !== selectedCategory) return false;
+      if (selectedNeighborhood !== 'All' && w.neighborhood !== selectedNeighborhood) return false;
       return true;
     });
-  }, [wants, selectedCategory, showFulfilled]);
+  }, [wants, selectedCategory, selectedNeighborhood, showFulfilled]);
 
   const handleOpenCreate = () => {
     const openForm = () => {
@@ -157,7 +167,7 @@ export function WantedPage() {
   };
 
   return (
-    <Page className="mx-auto max-w-6xl px-4 py-8 pb-24 sm:px-6 lg:px-8 lg:pb-16">
+    <Page className="mx-auto max-w-6xl px-4 py-8 pb-28 sm:px-6 lg:px-8 lg:pb-16">
       {/* Header */}
       <Reveal>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -182,8 +192,8 @@ export function WantedPage() {
         </div>
       </Reveal>
 
-      {/* Category filters & Fulfilled toggle */}
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Category & Neighborhood filters & Fulfilled toggle */}
+      <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0 flex-1">
           <CategoryChips
             id="wanted-categories"
@@ -194,15 +204,33 @@ export function WantedPage() {
           />
         </div>
 
-        <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 text-xs font-bold text-[var(--muted)]">
-          <input
-            type="checkbox"
-            checked={showFulfilled}
-            onChange={(e) => setShowFulfilled(e.target.checked)}
-            className="h-4 w-4 rounded accent-[var(--blue)]"
-          />
-          <span>Show fulfilled</span>
-        </label>
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {wantNeighborhoods.length > 0 && (
+            <select
+              value={selectedNeighborhood}
+              onChange={(e) => setSelectedNeighborhood(e.target.value)}
+              aria-label="Filter neighbor requests by neighborhood"
+              className="min-h-[40px] rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 text-xs font-bold text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+            >
+              <option value="All">All neighborhoods</option>
+              {wantNeighborhoods.map((hood) => (
+                <option key={hood} value={hood}>
+                  {hood}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 text-xs font-bold text-[var(--muted)]">
+            <input
+              type="checkbox"
+              checked={showFulfilled}
+              onChange={(e) => setShowFulfilled(e.target.checked)}
+              className="h-4 w-4 rounded accent-[var(--blue)]"
+            />
+            <span>Show fulfilled</span>
+          </label>
+        </div>
       </div>
 
       {/* Wants Grid */}
@@ -394,7 +422,7 @@ export function WantedPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
+            <div className="min-w-0">
               <label htmlFor="want-cat" className="mb-1 block text-sm font-bold text-[var(--navy)]">
                 Category
               </label>
@@ -402,7 +430,7 @@ export function WantedPage() {
                 id="want-cat"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+                className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
               >
                 {ITEM_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -412,7 +440,7 @@ export function WantedPage() {
               </select>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label htmlFor="want-date" className="mb-1 block text-sm font-bold text-[var(--navy)]">
                 Needed by
               </label>
@@ -422,7 +450,7 @@ export function WantedPage() {
                 min={today}
                 value={neededBy}
                 onChange={(e) => setNeededBy(e.target.value)}
-                className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+                className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
                 required
               />
             </div>

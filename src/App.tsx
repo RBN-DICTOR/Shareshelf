@@ -7,11 +7,13 @@ import React, { useState } from 'react';
 import { AnimatePresence, MotionConfig } from 'framer-motion';
 import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthModal } from './components/AuthModal';
+import { ChatDrawer } from './components/ChatDrawer';
 import { DebugConsole } from './components/DebugConsole';
 import { LoopBurst } from './components/LoopBurst';
 import { Navbar } from './components/Navbar';
 import { ShareItemModal } from './components/ShareItemModal';
 import { AuthProvider } from './hooks/useAuth';
+import { ChatProvider } from './hooks/useChat';
 import { ShareShelfDataProvider, useShareShelfData } from './hooks/useShareShelfData';
 import { ToastProvider } from './hooks/useToast';
 import { isSupabaseConfigured } from './lib/supabase';
@@ -78,6 +80,7 @@ function ShareShelfAppShell() {
       </AnimatePresence>
 
       <AuthModal />
+      <ChatDrawer />
       <ShareItemModal
         open={shareModalOpen}
         onClose={closeShareModal}
@@ -135,9 +138,11 @@ export default function App() {
         <ToastProvider>
           <AuthProvider supabaseReady={supabaseReady}>
             <ShareShelfDataProvider supabaseReady={supabaseReady}>
-              <HashRouter>
-                <ShareShelfAppShell />
-              </HashRouter>
+              <ChatProvider supabaseReady={supabaseReady}>
+                <HashRouter>
+                  <ShareShelfAppShell />
+                </HashRouter>
+              </ChatProvider>
             </ShareShelfDataProvider>
           </AuthProvider>
         </ToastProvider>

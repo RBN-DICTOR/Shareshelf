@@ -24,8 +24,8 @@ export function Stepper({ status }: { status: BorrowRequestStatus | string }) {
   const cur = STEP_INDEX[status as BorrowRequestStatus] ?? 0;
 
   return (
-    <div className="relative flex justify-between" aria-label="Borrow progress">
-      <div className="absolute left-7 right-7 top-[13px] h-1 rounded-full bg-[var(--line)]">
+    <div className="relative flex w-full justify-between gap-1" aria-label="Borrow progress">
+      <div className="absolute left-[10%] right-[10%] top-[12px] h-1 rounded-full bg-[var(--line)] sm:top-[13px]">
         <motion.div
           className="h-full rounded-full bg-[var(--blue)]"
           initial={{ width: 0 }}
@@ -36,12 +36,12 @@ export function Stepper({ status }: { status: BorrowRequestStatus | string }) {
       {STEPS.map((step, i) => (
         <div
           key={step}
-          className="relative z-10 flex w-14 flex-col items-center gap-1 text-center"
+          className="relative z-10 flex min-w-0 flex-1 flex-col items-center gap-1 text-center"
         >
           <motion.span
-            animate={{ scale: i === cur ? 1.15 : 1 }}
+            animate={{ scale: i === cur ? 1.12 : 1 }}
             transition={{ type: 'spring', stiffness: 400, damping: 26 }}
-            className={`grid h-7 w-7 place-items-center rounded-full border-2 text-xs font-extrabold ${
+            className={`grid h-6 w-6 place-items-center rounded-full border-2 text-[11px] font-extrabold sm:h-7 sm:w-7 sm:text-xs ${
               i <= cur
                 ? 'border-[var(--blue)] bg-[var(--blue)] text-white'
                 : 'border-[var(--line)] bg-white text-[var(--muted)]'
@@ -50,7 +50,7 @@ export function Stepper({ status }: { status: BorrowRequestStatus | string }) {
             {i < cur || status === 'completed' ? '✓' : i + 1}
           </motion.span>
           <span
-            className={`text-[10px] font-bold leading-tight ${
+            className={`px-0.5 text-[10px] font-bold leading-tight break-words ${
               i <= cur ? 'text-[var(--navy)]' : 'text-[var(--muted)]'
             }`}
           >

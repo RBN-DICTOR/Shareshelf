@@ -87,6 +87,21 @@ db.exec(`
     is_read INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
   );
+
+  CREATE TABLE IF NOT EXISTS borrow_messages (
+    id TEXT PRIMARY KEY,
+    thread_key TEXT NOT NULL,
+    item_id TEXT REFERENCES items(id) ON DELETE SET NULL,
+    request_id TEXT REFERENCES borrow_requests(id) ON DELETE SET NULL,
+    sender_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    recipient_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    message TEXT NOT NULL,
+    is_read INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_borrow_messages_thread
+    ON borrow_messages (thread_key, created_at);
 `);
 
 export function hashPassword(password: string): string {

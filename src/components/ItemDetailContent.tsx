@@ -4,11 +4,13 @@ import {
   CheckCircle2,
   Edit3,
   MapPin,
+  MessageCircle,
   ShieldCheck,
   Trash2,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useChat } from '../hooks/useChat';
 import { useShareShelfData } from '../hooks/useShareShelfData';
 import {
   datesOverlap,
@@ -36,6 +38,7 @@ export function ItemDetailContent({
 }: ItemDetailContentProps) {
   const navigate = useNavigate();
   const { user, openAuthModal } = useAuth();
+  const { openChatWith } = useChat();
   const { submitBorrowRequest, removeItem } = useShareShelfData();
 
   const [showRequestForm, setShowRequestForm] = useState(false);
@@ -253,7 +256,7 @@ export function ItemDetailContent({
           {/* How borrowing works mini-explainer */}
           <div className="rounded-3xl bg-[var(--sun-soft)] p-4">
             <p className="text-xs font-extrabold text-[var(--navy)]">How borrowing works</p>
-            <div className="mt-2 grid grid-cols-3 gap-2 text-xs font-semibold text-[var(--navy)]">
+            <div className="mt-2 grid grid-cols-1 gap-2 text-xs font-semibold text-[var(--navy)] sm:grid-cols-3">
               <div className="flex items-start gap-1.5">
                 <CheckCircle2
                   className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--blue)]"
@@ -334,17 +337,55 @@ export function ItemDetailContent({
             </div>
           ) : !item.is_available ? (
             <div className="space-y-2.5">
-              <Button disabled variant="ghost" className="w-full">
-                Currently unavailable
-              </Button>
+              <div className="flex flex-col gap-2.5 sm:flex-row">
+                <Button disabled variant="ghost" className="w-full sm:flex-1">
+                  Currently unavailable
+                </Button>
+                <Button
+                  variant="blue"
+                  onClick={() =>
+                    openChatWith({
+                      recipient: item.owner || {
+                        id: item.owner_id,
+                        full_name: ownerName,
+                        neighborhood: item.neighborhood,
+                      },
+                      item,
+                    })
+                  }
+                  className="w-full sm:w-auto"
+                >
+                  <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                  Message {ownerName.split(' ')[0]}
+                </Button>
+              </div>
               <p className="text-center text-xs font-medium text-[var(--muted)]">
                 The owner has paused borrowing for this item right now.
               </p>
             </div>
           ) : !showRequestForm ? (
-            <Button variant="orange" onClick={handleOpenRequestForm} className="w-full">
-              Request to borrow
-            </Button>
+            <div className="flex flex-col gap-2.5 sm:flex-row">
+              <Button variant="orange" onClick={handleOpenRequestForm} className="w-full sm:flex-1">
+                Request to borrow
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  openChatWith({
+                    recipient: item.owner || {
+                      id: item.owner_id,
+                      full_name: ownerName,
+                      neighborhood: item.neighborhood,
+                    },
+                    item,
+                  })
+                }
+                className="w-full sm:w-auto"
+              >
+                <MessageCircle className="h-4 w-4 text-[var(--blue)]" aria-hidden="true" />
+                Chat with {ownerName.split(' ')[0]}
+              </Button>
+            </div>
           ) : (
             <form onSubmit={handleRequestSubmit} className="space-y-4" noValidate>
               <div className="flex items-center justify-between">
@@ -362,7 +403,7 @@ export function ItemDetailContent({
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
+                <div className="min-w-0">
                   <label
                     htmlFor="borrow-start"
                     className="mb-1 block text-xs font-bold text-[var(--navy)]"
@@ -382,11 +423,11 @@ export function ItemDetailContent({
                       }
                       setSubmitError(null);
                     }}
-                    className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+                    className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
                     required
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <label
                     htmlFor="borrow-end"
                     className="mb-1 block text-xs font-bold text-[var(--navy)]"
@@ -402,7 +443,7 @@ export function ItemDetailContent({
                       setEndDate(e.target.value);
                       setSubmitError(null);
                     }}
-                    className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+                    className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
                     required
                   />
                 </div>

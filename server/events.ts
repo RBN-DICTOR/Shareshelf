@@ -5,7 +5,8 @@ export type ShareShelfEventType =
   | 'borrow_requests'
   | 'item_wants'
   | 'want_responses'
-  | 'notifications';
+  | 'notifications'
+  | 'borrow_messages';
 
 interface SseClient {
   id: string;

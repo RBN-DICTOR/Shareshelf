@@ -64,12 +64,12 @@ export function ImpactPage() {
   ];
 
   return (
-    <Page className="pb-24 lg:pb-16">
+    <Page className="pb-28 lg:pb-16">
       {/* Header with ribbons */}
       <section className="relative overflow-hidden border-b border-[var(--line)] bg-[var(--sun-soft)]/55">
         <Ribbons />
-        <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="inline-block rounded-3xl bg-white/90 px-6 py-5 shadow-[var(--shadow)] backdrop-blur-sm">
+        <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+          <div className="inline-block w-full rounded-3xl bg-white/90 px-5 py-4 shadow-[var(--shadow)] backdrop-blur-sm sm:w-auto sm:px-6 sm:py-5">
             <h1 className="text-3xl font-extrabold text-[var(--navy)] sm:text-5xl">
               What sharing adds up to
             </h1>

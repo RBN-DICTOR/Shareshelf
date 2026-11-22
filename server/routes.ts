@@ -1163,3 +1163,184 @@ apiRouter.get('/impact', (_req: Request, res: Response) => {
     demo_items: Number(row.demo_items) || 0,
   });
 });
+
+// ============ NEIGHBOR CHAT MESSAGES ============
+
+function buildServerThreadKey(itemId: string | null, userA: string, userB: string): string {
+  const [p1, p2] = [userA, userB].sort();
+  return `${itemId || 'direct'}::${p1}::${p2}`;
+}
+
+function mapMessageRow(row: Record<string, unknown>) {
+  return {
+    id: row.id,
+    thread_key: row.thread_key,
+    item_id: row.item_id ?? null,
+    request_id: row.request_id ?? null,
+    sender_id: row.sender_id,
+    recipient_id: row.recipient_id,
+    message: row.message,
+    is_read: Boolean(row.is_read),
+    created_at: row.created_at,
+    sender: row.sender_name
+      ? {
+          id: row.sender_id,
+          full_name: row.sender_name,
+          neighborhood: row.sender_neighborhood ?? null,
+        }
+      : null,
+    recipient: row.recipient_name
+      ? {
+          id: row.recipient_id,
+          full_name: row.recipient_name,
+          neighborhood: row.recipient_neighborhood ?? null,
+        }
+      : null,
+    item: row.item_name
+      ? {
+          id: row.item_id,
+          name: row.item_name,
+          image_url: row.item_image_url ?? null,
+          category: row.item_category,
+          neighborhood: row.item_neighborhood,
+        }
+      : null,
+  };
+}
+
+apiRouter.get('/messages', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.authUser!.id;
+  const rows = db
+    .prepare(
+      `SELECT m.*,
+        sp.full_name AS sender_name, sp.neighborhood AS sender_neighborhood,
+        rp.full_name AS recipient_name, rp.neighborhood AS recipient_neighborhood,
+        i.name AS item_name, i.image_url AS item_image_url, i.category AS item_category, i.neighborhood AS item_neighborhood
+       FROM borrow_messages m
+       LEFT JOIN profiles sp ON sp.id = m.sender_id
+       LEFT JOIN profiles rp ON rp.id = m.recipient_id
+       LEFT JOIN items i ON i.id = m.item_id
+       WHERE m.sender_id = ? OR m.recipient_id = ?
+       ORDER BY m.created_at ASC`
+    )
+    .all(userId, userId) as Record<string, unknown>[];
+
+  res.json(rows.map(mapMessageRow));
+});
+
+apiRouter.post('/messages', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const senderId = req.authUser!.id;
+  const recipientId = typeof req.body?.recipient_id === 'string' ? req.body.recipient_id.trim() : '';
+  const itemId = typeof req.body?.item_id === 'string' && req.body.item_id.trim() ? req.body.item_id.trim() : null;
+  const requestId =
+    typeof req.body?.request_id === 'string' && req.body.request_id.trim()
+      ? req.body.request_id.trim()
+      : null;
+  const message = cleanStr(req.body?.message).slice(0, 1000);
+
+  if (!recipientId) {
+    res.status(400).json({ error: 'Missing recipient.' });
+    return;
+  }
+  if (recipientId === senderId) {
+    res.status(400).json({ error: 'You cannot send a message to yourself.' });
+    return;
+  }
+  if (!message) {
+    res.status(400).json({ error: 'Please write a message first.' });
+    return;
+  }
+
+  const recipientRow = db.prepare('SELECT id FROM profiles WHERE id = ?').get(recipientId);
+  if (!recipientRow) {
+    res.status(404).json({ error: 'Recipient not found.' });
+    return;
+  }
+
+  const threadKey = buildServerThreadKey(itemId, senderId, recipientId);
+  const id = crypto.randomUUID();
+  const notifId = crypto.randomUUID();
+
+  const senderProfile = db
+    .prepare('SELECT full_name FROM profiles WHERE id = ?')
+    .get(senderId) as { full_name?: string } | undefined;
+  const itemRow = itemId
+    ? (db.prepare('SELECT name FROM items WHERE id = ?').get(itemId) as { name?: string } | undefined)
+    : undefined;
+
+  const notifMsg = itemRow?.name
+    ? `New message from ${senderProfile?.full_name || 'a neighbor'} about ${itemRow.name}`
+    : `New message from ${senderProfile?.full_name || 'a neighbor'}`;
+
+  db.exec('BEGIN');
+  try {
+    db.prepare(
+      `INSERT INTO borrow_messages (id, thread_key, item_id, request_id, sender_id, recipient_id, message, is_read)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 0)`
+    ).run(id, threadKey, itemId, requestId, senderId, recipientId, message);
+
+    db.prepare(
+      'INSERT INTO notifications (id, user_id, message, is_read) VALUES (?, ?, ?, 0)'
+    ).run(notifId, recipientId, notifMsg);
+
+    db.exec('COMMIT');
+  } catch {
+    db.exec('ROLLBACK');
+    res.status(500).json({ error: 'Could not send message.' });
+    return;
+  }
+
+  const createdRow = db
+    .prepare(
+      `SELECT m.*,
+        sp.full_name AS sender_name, sp.neighborhood AS sender_neighborhood,
+        rp.full_name AS recipient_name, rp.neighborhood AS recipient_neighborhood,
+        i.name AS item_name, i.image_url AS item_image_url, i.category AS item_category, i.neighborhood AS item_neighborhood
+       FROM borrow_messages m
+       LEFT JOIN profiles sp ON sp.id = m.sender_id
+       LEFT JOIN profiles rp ON rp.id = m.recipient_id
+       LEFT JOIN items i ON i.id = m.item_id
+       WHERE m.id = ?`
+    )
+    .get(id) as Record<string, unknown>;
+
+  const notif = db.prepare('SELECT * FROM notifications WHERE id = ?').get(notifId) as Record<
+    string,
+    unknown
+  >;
+
+  const mapped = mapMessageRow(createdRow);
+  broadcastEvent('borrow_messages', { message: mapped }, recipientId);
+  broadcastEvent('borrow_messages', { message: mapped }, senderId);
+  broadcastEvent(
+    'notifications',
+    {
+      notification: {
+        ...notif,
+        is_read: Boolean(notif.is_read),
+      },
+    },
+    recipientId
+  );
+
+  res.status(201).json(mapped);
+});
+
+apiRouter.patch(
+  '/messages/thread/read',
+  requireAuth,
+  (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.authUser!.id;
+    const threadKey = typeof req.body?.thread_key === 'string' ? req.body.thread_key.trim() : '';
+    if (!threadKey) {
+      res.status(400).json({ error: 'Missing thread_key.' });
+      return;
+    }
+
+    db.prepare(
+      'UPDATE borrow_messages SET is_read = 1 WHERE thread_key = ? AND recipient_id = ? AND is_read = 0'
+    ).run(threadKey, userId);
+
+    res.json({ ok: true });
+  }
+);

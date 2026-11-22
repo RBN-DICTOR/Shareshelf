@@ -112,6 +112,35 @@ export interface CommunityImpact {
   demo_items: number;
 }
 
+export interface ChatMessage {
+  id: string;
+  thread_key: string;
+  item_id: string | null;
+  request_id: string | null;
+  sender_id: string;
+  recipient_id: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  sender?: Profile | null;
+  recipient?: Profile | null;
+  item?: Pick<Item, 'id' | 'name' | 'image_url' | 'category' | 'neighborhood'> | null;
+}
+
+export interface ChatThread {
+  threadKey: string;
+  itemId: string | null;
+  requestId: string | null;
+  itemName: string | null;
+  itemImageUrl: string | null;
+  itemCategory: ItemCategory | string | null;
+  otherUser: Profile;
+  lastMessage: string;
+  lastMessageAt: string;
+  unreadCount: number;
+  messages: ChatMessage[];
+}
+
 export interface DebugErrorLog {
   id: string;
   time: string;

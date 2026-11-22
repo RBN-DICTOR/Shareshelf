@@ -42,14 +42,14 @@ export function Hero({ items, loading = false, onExplore, onShare, onSelectItem 
       {/* Self-drawing ribbons */}
       <Ribbons />
 
-      <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 md:py-24 lg:px-8">
-        <div>
+      <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-10 sm:px-6 md:grid-cols-2 md:gap-10 md:py-24 lg:px-8">
+        <div className="min-w-0">
           <Headline text="Good things are better when shared." />
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.65, duration: 0.4 }}
-            className="mt-5 max-w-md text-lg font-semibold leading-relaxed text-[var(--navy)]/85"
+            className="mt-4 max-w-md text-base font-semibold leading-relaxed text-[var(--navy)]/85 sm:mt-5 sm:text-lg"
           >
             Borrow everyday essentials from your community, save money, and give useful things a
             second life.
@@ -59,7 +59,7 @@ export function Hero({ items, loading = false, onExplore, onShare, onSelectItem 
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.85, duration: 0.35 }}
-            className="mt-8 flex flex-wrap gap-3"
+            className="mt-6 flex flex-wrap gap-3 sm:mt-8"
           >
             <Button variant="navy" onClick={onExplore}>
               Explore items
@@ -69,18 +69,51 @@ export function Hero({ items, loading = false, onExplore, onShare, onSelectItem 
             </Button>
           </motion.div>
 
-          <span className="mt-6 inline-block rounded-full bg-white px-4 py-2 text-sm font-bold text-[var(--navy)] shadow-[var(--shadow)]">
+          <p className="mt-5 inline-block rounded-2xl bg-white px-4 py-2 text-xs font-bold text-[var(--navy)] shadow-[var(--shadow)] sm:mt-6 sm:rounded-full sm:text-sm">
             Your neighborhood is full of things worth sharing.
-          </span>
+          </p>
         </div>
 
-        {/* 4 Floating real item cards */}
-        <div className="relative h-[320px] sm:h-[340px]">
+        {/* Mobile (<md): stable 2x2 card grid so cards never clip or overlap */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:hidden">
+          {loading && showcase.length === 0
+            ? [0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="rounded-3xl border border-[var(--line)] bg-white p-2 shadow-lg"
+                >
+                  <div className="shimmer aspect-square rounded-2xl" />
+                  <div className="shimmer mx-1 mt-2 h-3.5 w-3/4 rounded-full" />
+                </div>
+              ))
+            : showcase.map((it) => (
+                <button
+                  key={it.id}
+                  type="button"
+                  onClick={() => onSelectItem(it)}
+                  className="group min-w-0 cursor-pointer rounded-3xl border border-[var(--line)] bg-white p-2 text-left shadow-lg transition-shadow hover:shadow-xl"
+                >
+                  <div className="aspect-square overflow-hidden rounded-2xl bg-[var(--sun-soft)]">
+                    <ItemImage
+                      item={it}
+                      iconSize="sm"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  <p className="truncate px-1 pt-2 text-xs font-extrabold text-[var(--navy)] sm:text-sm">
+                    {it.name}
+                  </p>
+                </button>
+              ))}
+        </div>
+
+        {/* Desktop (md+): 4 Floating tilted real item cards */}
+        <div className="relative hidden h-[340px] md:block">
           {loading && showcase.length === 0
             ? FLOAT_POSITIONS.map(([left, top, rotate], i) => (
                 <div
                   key={i}
-                  className="absolute w-36 rounded-3xl border border-[var(--line)] bg-white p-2 shadow-xl md:w-44"
+                  className="absolute w-40 rounded-3xl border border-[var(--line)] bg-white p-2 shadow-xl lg:w-44"
                   style={{
                     left: `${left}%`,
                     top: `${top}%`,
@@ -99,7 +132,7 @@ export function Hero({ items, loading = false, onExplore, onShare, onSelectItem 
                     key={it.id}
                     type="button"
                     onClick={() => onSelectItem(it)}
-                    className="group absolute w-36 cursor-pointer rounded-3xl border border-[var(--line)] bg-white p-2 text-left shadow-xl transition-shadow hover:shadow-2xl md:w-44"
+                    className="group absolute w-40 cursor-pointer rounded-3xl border border-[var(--line)] bg-white p-2 text-left shadow-xl transition-shadow hover:shadow-2xl lg:w-44"
                     style={{
                       left: `${left}%`,
                       top: `${top}%`,

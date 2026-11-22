@@ -261,7 +261,7 @@ export function ShareItemModal({
                 referrerPolicy="no-referrer"
                 className="aspect-[4/3] max-h-64 w-full object-cover"
               />
-              <div className="absolute top-3 right-3 flex items-center gap-2">
+              <div className="absolute top-2.5 right-2.5 flex flex-wrap justify-end items-center gap-1.5 sm:gap-2">
                 {imageUrl.startsWith('data:image/') && (
                   <button
                     type="button"
@@ -405,7 +405,7 @@ export function ShareItemModal({
 
         {/* Category & Condition */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
+          <div className="min-w-0">
             <label
               htmlFor="item-category"
               className="mb-1 block text-sm font-bold text-[var(--navy)]"
@@ -416,7 +416,7 @@ export function ShareItemModal({
               id="item-category"
               value={category}
               onChange={(e) => setCategory(e.target.value as ItemCategory)}
-              className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+              className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
             >
               {ITEM_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
@@ -426,7 +426,7 @@ export function ShareItemModal({
             </select>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <label
               htmlFor="item-condition"
               className="mb-1 block text-sm font-bold text-[var(--navy)]"
@@ -437,7 +437,7 @@ export function ShareItemModal({
               id="item-condition"
               value={condition}
               onChange={(e) => setCondition(e.target.value as ItemCondition)}
-              className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+              className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
             >
               {ITEM_CONDITIONS.map((cond) => (
                 <option key={cond} value={cond}>
@@ -450,7 +450,7 @@ export function ShareItemModal({
 
         {/* Neighborhood & Replacement value */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
+          <div className="min-w-0">
             <label
               htmlFor="item-neighborhood"
               className="mb-1 block text-sm font-bold text-[var(--navy)]"
@@ -463,7 +463,7 @@ export function ShareItemModal({
               value={neighborhood}
               onChange={(e) => setNeighborhood(e.target.value)}
               placeholder="e.g., Riverside"
-              className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
+              className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
               required
             />
             {fieldErrors.neighborhood && (
@@ -473,7 +473,7 @@ export function ShareItemModal({
             )}
           </div>
 
-          <div>
+          <div className="min-w-0">
             <label htmlFor="item-value" className="mb-1 block text-sm font-bold text-[var(--navy)]">
               Estimated replacement value (USD)
             </label>
