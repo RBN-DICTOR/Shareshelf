@@ -154,7 +154,7 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
           >
             <div className="relative overflow-hidden rounded-3xl border border-[var(--line)] bg-white p-5 shadow-[var(--shadow)] sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
+                <div className="min-w-0">
                   <span className="text-xs font-extrabold text-[var(--orange)]">
                     How the loop works
                   </span>
@@ -184,7 +184,7 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
                     <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--blue)] text-xs font-extrabold text-white">
                       {step.num}
                     </span>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm font-extrabold text-[var(--navy)]">{step.title}</p>
                       <p className="text-xs font-medium text-[var(--navy)]/80">{step.desc}</p>
                     </div>
@@ -227,7 +227,7 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search drills, tents, books, or neighborhoods..."
                 aria-label="Search neighborhood items"
-                className="min-h-[48px] w-full rounded-full border border-[var(--line)] bg-white pl-12 pr-11 text-sm font-medium text-[var(--navy)] shadow-[var(--shadow)] placeholder:text-[var(--muted)] focus:border-[var(--blue)] focus:outline-none"
+                className="min-h-[48px] w-full rounded-full border border-[var(--line)] bg-white pl-12 pr-11 text-base font-medium text-[var(--navy)] shadow-[var(--shadow)] placeholder:text-[var(--muted)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
               />
               {search && (
                 <button
@@ -246,7 +246,7 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
                 value={selectedNeighborhood}
                 onChange={(e) => setSelectedNeighborhood(e.target.value)}
                 aria-label="Filter by neighborhood"
-                className="min-h-[44px] min-w-0 flex-1 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-bold text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:flex-initial"
+                className="min-h-[44px] min-w-0 flex-1 basis-[170px] rounded-full border border-[var(--line)] bg-white px-4 py-2 text-base font-bold text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:flex-initial sm:basis-auto sm:text-sm"
               >
                 <option value="All">All neighborhoods ({safeItems.length})</option>
                 {neighborhoodCounts.map((hood) => (

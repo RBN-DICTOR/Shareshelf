@@ -35,16 +35,18 @@ export function NotificationsPanel({ open, onClose }: NotificationsPanelProps) {
             aria-hidden="true"
           />
 
-          {/* Mobile full-screen list / Desktop dropdown */}
-          <motion.div
-            role="dialog"
-            aria-label="Notifications"
-            initial={{ opacity: 0, y: 10, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.97 }}
-            transition={{ type: 'spring', stiffness: 360, damping: 28 }}
-            className="fixed inset-0 z-50 flex flex-col bg-white lg:absolute lg:inset-auto lg:top-full lg:right-0 lg:mt-2 lg:w-96 lg:max-h-[460px] lg:rounded-3xl lg:border lg:border-[var(--line)] lg:shadow-2xl"
-          >
+          {/* Mobile full-screen list / Desktop top-right dropdown */}
+          <div className="pointer-events-none fixed inset-0 z-50 flex flex-col lg:inset-x-0 lg:top-16 lg:bottom-auto">
+            <div className="flex h-full w-full flex-col lg:mx-auto lg:max-w-6xl lg:items-end lg:px-4 lg:pt-2">
+              <motion.div
+                role="dialog"
+                aria-label="Notifications"
+                initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                className="pointer-events-auto flex h-full w-full flex-col bg-white lg:h-auto lg:max-h-[460px] lg:w-96 lg:rounded-3xl lg:border lg:border-[var(--line)] lg:shadow-2xl"
+              >
             <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
               <div className="flex items-center gap-2">
                 <Bell className="h-4 w-4 text-[var(--blue)]" aria-hidden="true" />
@@ -99,7 +101,7 @@ export function NotificationsPanel({ open, onClose }: NotificationsPanelProps) {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <p
-                        className={`text-sm leading-snug ${
+                        className={`min-w-0 flex-1 break-words text-sm leading-snug ${
                           notif.is_read
                             ? 'font-medium text-[var(--navy)]/85'
                             : 'font-bold text-[var(--navy)]'
@@ -121,7 +123,9 @@ export function NotificationsPanel({ open, onClose }: NotificationsPanelProps) {
                 ))
               )}
             </div>
-          </motion.div>
+              </motion.div>
+            </div>
+          </div>
         </>
       )}
     </AnimatePresence>

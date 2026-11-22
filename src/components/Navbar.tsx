@@ -19,7 +19,7 @@ import { useChat } from '../hooks/useChat';
 import { useShareShelfData } from '../hooks/useShareShelfData';
 import { getInitials } from '../lib/format';
 import { Button } from './Button';
-import { Logo } from './Logo';
+import { LogoMark } from './Logo';
 import { NotificationsPanel } from './NotificationsPanel';
 
 interface NavbarProps {
@@ -44,6 +44,7 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const accountBtnRef = useRef<HTMLButtonElement | null>(null);
 
   const displayName =
     profile?.full_name ||
@@ -61,7 +62,13 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
   useEffect(() => {
     if (!menuOpen) return;
     const handleOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        accountBtnRef.current &&
+        !accountBtnRef.current.contains(target)
+      ) {
         setMenuOpen(false);
       }
     };
@@ -140,14 +147,17 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
 
   return (
     <>
-      {/* Desktop & Slim Mobile Top Bar */}
-      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--cream)]/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-2.5 shrink-0">
-            <Link to="/" className="inline-flex items-center rounded-xl">
-              <Logo size={30} />
+      {/* Desktop & Clean Single-Row Mobile Header */}
+      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--cream)]/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-6xl flex-nowrap items-center justify-between gap-2 px-3 lg:h-16 lg:px-4">
+          <div className="flex min-w-0 shrink items-center gap-2.5">
+            <Link to="/" className="flex min-w-0 shrink items-center gap-2 rounded-xl">
+              <LogoMark size={32} />
+              <span className="hidden truncate font-display text-lg font-extrabold tracking-tight text-[var(--blue)] min-[380px]:inline lg:text-xl">
+                ShareShelf
+              </span>
             </Link>
-            <span className="hidden md:inline-block rounded-full border border-[var(--line)] bg-white px-2.5 py-0.5 text-[11px] font-bold text-[var(--muted)] whitespace-nowrap">
+            <span className="hidden rounded-full border border-[var(--line)] bg-white px-2.5 py-0.5 text-[11px] font-bold text-[var(--muted)] whitespace-nowrap lg:inline-block">
               Prototype demo
             </span>
           </div>
@@ -192,7 +202,7 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
             </nav>
           </LayoutGroup>
 
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-2">
             <Button
               variant="orange"
               onClick={handleShareClick}
@@ -201,48 +211,48 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
               Share an item
             </Button>
 
-            {/* Inbuilt Neighbor Messages */}
-            <button
-              type="button"
-              onClick={() => {
-                setNotifOpen(false);
-                setMenuOpen(false);
-                openInbox();
-              }}
-              aria-label="Neighbor messages"
-              className="relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-[var(--line)] bg-white text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)]"
-            >
-              <MessageCircle className="h-4 w-4" aria-hidden="true" />
-              {user && unreadMessagesCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--blue)] px-1 text-[11px] font-extrabold text-white tabular-nums ring-2 ring-[var(--cream)]">
-                  {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
-                </span>
-              )}
-            </button>
-
-            {/* Notifications Bell */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={handleNotificationsClick}
-                aria-label="Notifications"
-                aria-expanded={notifOpen}
-                className="relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-[var(--line)] bg-white text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)]"
-              >
-                <Bell className="h-4 w-4" aria-hidden="true" />
-                {user && unreadNotificationsCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--orange)] px-1 text-[11px] font-extrabold text-white tabular-nums ring-2 ring-[var(--cream)]">
-                    {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
-                  </span>
-                )}
-              </button>
-              <NotificationsPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
-            </div>
-
-            {/* Avatar menu or Sign in */}
             {user ? (
-              <div className="relative" ref={menuRef}>
+              <>
+                {/* Desktop Neighbor Messages shortcut (mobile uses avatar menu & item/activity chat buttons) */}
                 <button
+                  type="button"
+                  onClick={() => {
+                    setNotifOpen(false);
+                    setMenuOpen(false);
+                    openInbox();
+                  }}
+                  aria-label="Neighbor messages"
+                  className="hidden h-11 items-center justify-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-3 text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)] lg:inline-flex"
+                >
+                  <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  {unreadMessagesCount > 0 && (
+                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--blue)] px-1 text-[11px] font-extrabold text-white tabular-nums">
+                      {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Notification Bell */}
+                <button
+                  type="button"
+                  onClick={handleNotificationsClick}
+                  aria-label="Notifications"
+                  aria-expanded={notifOpen}
+                  className={`inline-flex h-11 items-center justify-center gap-1 rounded-full border border-[var(--line)] bg-white text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)] ${
+                    unreadNotificationsCount > 0 ? 'px-2.5' : 'w-11'
+                  }`}
+                >
+                  <Bell className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  {unreadNotificationsCount > 0 && (
+                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--orange)] px-1 text-[11px] font-extrabold text-white tabular-nums">
+                      {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Avatar Menu Trigger */}
+                <button
+                  ref={accountBtnRef}
                   type="button"
                   onClick={() => {
                     setNotifOpen(false);
@@ -250,114 +260,122 @@ export function Navbar({ onOpenShareModal }: NavbarProps) {
                   }}
                   aria-label="Account menu"
                   aria-expanded={menuOpen}
-                  className="flex h-10 sm:h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-white pl-1 pr-1 sm:pl-1.5 sm:pr-3 text-sm font-bold text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)]"
+                  className="inline-flex h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-white pl-1.5 pr-1.5 text-sm font-bold text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)] sm:pr-3"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--blue)] text-xs font-extrabold text-white">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--blue)] text-xs font-extrabold text-white">
                     {getInitials(displayName)}
                   </span>
-                  <span className="hidden sm:inline max-w-[110px] truncate">
+                  <span className="hidden max-w-[110px] truncate sm:inline">
                     {displayName.split(' ')[0]}
                   </span>
                 </button>
-
-                <AnimatePresence>
-                  {menuOpen && (
-                    <motion.div
-                      role="menu"
-                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.96 }}
-                      transition={{ duration: 0.16 }}
-                      className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-3xl border border-[var(--line)] bg-white py-2 shadow-2xl"
-                    >
-                      <div className="border-b border-[var(--line)] px-4 py-3">
-                        <p className="truncate text-sm font-extrabold text-[var(--navy)]">
-                          {displayName}
-                        </p>
-                        <p className="mt-0.5 truncate text-xs font-medium text-[var(--muted)]">
-                          {profile?.neighborhood || 'Neighborhood member'}
-                        </p>
-                      </div>
-
-                      <div className="py-1">
-                        {isDemoAccount && (
-                          <button
-                            type="button"
-                            role="menuitem"
-                            onClick={async () => {
-                              setMenuOpen(false);
-                              await switchDemoUser();
-                            }}
-                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-bold text-[var(--blue)] hover:bg-[var(--blue-soft)]/60"
-                          >
-                            <ArrowLeftRight className="h-4 w-4 shrink-0" aria-hidden="true" />
-                            <span>Switch to {otherDemoName}</span>
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            setMenuOpen(false);
-                            openInbox();
-                          }}
-                          className="flex w-full items-center justify-between gap-2.5 px-4 py-2.5 text-left text-sm font-semibold text-[var(--navy)] hover:bg-[var(--sun-soft)]/50"
-                        >
-                          <span className="flex items-center gap-2.5">
-                            <MessageCircle className="h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
-                            <span>Messages</span>
-                          </span>
-                          {unreadMessagesCount > 0 && (
-                            <span className="rounded-full bg-[var(--blue)] px-2 py-0.5 text-[11px] font-extrabold text-white tabular-nums">
-                              {unreadMessagesCount}
-                            </span>
-                          )}
-                        </button>
-
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            setMenuOpen(false);
-                            navigate('/activity');
-                          }}
-                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-semibold text-[var(--navy)] hover:bg-[var(--sun-soft)]/50"
-                        >
-                          <LayoutList className="h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
-                          <span>My activity</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={async () => {
-                            setMenuOpen(false);
-                            await signOut();
-                          }}
-                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-semibold text-[var(--danger)] hover:bg-red-50"
-                        >
-                          <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
-                          <span>Sign out</span>
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              </>
             ) : (
-              <button
-                type="button"
+              <Button
+                variant="blue"
                 onClick={() => openAuthModal()}
-                className="inline-flex min-h-[40px] sm:min-h-[44px] items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)] whitespace-nowrap shrink-0"
+                className="px-4 whitespace-nowrap"
               >
-                <UserIcon className="h-4 w-4 text-[var(--blue)]" aria-hidden="true" />
-                <span>Sign in</span>
-              </button>
+                Sign in
+              </Button>
             )}
           </div>
         </div>
       </header>
+
+      {/* Account Dropdown Menu (rendered outside header so header has zero absolute/fixed children) */}
+      <AnimatePresence>
+        {user && menuOpen && (
+          <div className="pointer-events-none fixed inset-x-0 top-14 z-50 pt-[env(safe-area-inset-top)] lg:top-16">
+            <div className="mx-auto flex max-w-6xl justify-end px-3 pt-2 lg:px-4">
+              <motion.div
+                ref={menuRef}
+                role="menu"
+                initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                transition={{ duration: 0.16 }}
+                className="pointer-events-auto w-64 max-w-[calc(100%-1.5rem)] overflow-hidden rounded-3xl border border-[var(--line)] bg-white py-2 shadow-2xl"
+              >
+                <div className="border-b border-[var(--line)] px-4 py-3">
+                  <p className="truncate text-sm font-extrabold text-[var(--navy)]">
+                    {displayName}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs font-medium text-[var(--muted)]">
+                    {profile?.neighborhood || 'Neighborhood member'}
+                  </p>
+                </div>
+
+                <div className="py-1">
+                  {isDemoAccount && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={async () => {
+                        setMenuOpen(false);
+                        await switchDemoUser();
+                      }}
+                      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-bold text-[var(--blue)] hover:bg-[var(--blue-soft)]/60"
+                    >
+                      <ArrowLeftRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span className="min-w-0 truncate">Switch to {otherDemoName}</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      openInbox();
+                    }}
+                    className="flex w-full items-center justify-between gap-2.5 px-4 py-2.5 text-left text-sm font-semibold text-[var(--navy)] hover:bg-[var(--sun-soft)]/50"
+                  >
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      <MessageCircle className="h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
+                      <span className="truncate">Messages</span>
+                    </span>
+                    {unreadMessagesCount > 0 && (
+                      <span className="shrink-0 rounded-full bg-[var(--blue)] px-2 py-0.5 text-[11px] font-extrabold text-white tabular-nums">
+                        {unreadMessagesCount}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate('/activity');
+                    }}
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-semibold text-[var(--navy)] hover:bg-[var(--sun-soft)]/50"
+                  >
+                    <LayoutList className="h-4 w-4 shrink-0 text-[var(--muted)]" aria-hidden="true" />
+                    <span className="truncate">My activity</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={async () => {
+                      setMenuOpen(false);
+                      await signOut();
+                    }}
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-semibold text-[var(--danger)] hover:bg-red-50"
+                  >
+                    <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span className="truncate">Sign out</span>
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Notifications Panel (rendered outside header) */}
+      <NotificationsPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
 
       {/* Mobile Bottom Tab Bar (<1024px) */}
       <nav

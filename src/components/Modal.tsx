@@ -59,21 +59,23 @@ export function Modal({
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 48, opacity: 0, scale: 0.98 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className={`relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[32px] border border-[var(--line)] bg-[var(--cream)] shadow-2xl sm:max-h-[88dvh] sm:rounded-[32px] ${maxWidthClass}`}
+            className={`relative flex max-h-[92vh] max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[32px] border border-[var(--line)] bg-[var(--cream)] shadow-2xl sm:max-h-[88dvh] sm:rounded-[32px] ${maxWidthClass}`}
           >
             {/* Mobile grab handle */}
-            <div className="flex justify-center pt-3 pb-1 sm:hidden" aria-hidden="true">
+            <div className="flex shrink-0 justify-center pt-3 pb-1 sm:hidden" aria-hidden="true">
               <span className="h-1.5 w-10 rounded-full bg-[var(--line)]" />
             </div>
 
             {!hideHeader && (
-              <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] px-5 py-4 sm:px-6">
-                <h2 className="text-lg font-extrabold text-[var(--navy)] sm:text-xl">{title}</h2>
+              <div className="flex shrink-0 items-center justify-between gap-4 border-b border-[var(--line)] px-4 py-3.5 sm:px-6 sm:py-4">
+                <h2 className="min-w-0 truncate text-lg font-extrabold text-[var(--navy)] sm:text-xl">
+                  {title}
+                </h2>
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label="Close modal"
-                  className="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-white text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)]"
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-white text-[var(--navy)] transition-colors hover:bg-[var(--sun-soft)]"
                 >
                   <X className="h-5 w-5" aria-hidden="true" />
                 </button>
@@ -85,13 +87,13 @@ export function Modal({
                 type="button"
                 onClick={onClose}
                 aria-label="Close modal"
-                className="absolute top-4 right-4 z-20 grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-white text-[var(--navy)] shadow-sm transition-colors hover:bg-[var(--sun-soft)]"
+                className="absolute top-3.5 right-3.5 z-20 grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-white text-[var(--navy)] shadow-sm transition-colors hover:bg-[var(--sun-soft)] sm:top-4 sm:right-4"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
             )}
 
-            <div className="flex-1 overflow-y-auto overscroll-contain">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</div>
           </motion.div>
         </motion.div>
       )}

@@ -206,7 +206,7 @@ export function ShareItemModal({
       <form
         onSubmit={handleSubmit}
         onPaste={handlePasteImage}
-        className="space-y-5 p-5 sm:p-6"
+        className="space-y-5 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-6"
         noValidate
       >
         {/* Photo upload or PNG creation */}
@@ -374,7 +374,7 @@ export function ShareItemModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g., Cordless power drill"
-            className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
+            className="min-h-[44px] w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none sm:text-sm"
             required
           />
           {fieldErrors.name && (
@@ -393,7 +393,7 @@ export function ShareItemModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Share what's included, size, or anything helpful to know before borrowing."
-            className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
+            className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none sm:text-sm"
             required
           />
           {fieldErrors.description && (
@@ -416,7 +416,7 @@ export function ShareItemModal({
               id="item-category"
               value={category}
               onChange={(e) => setCategory(e.target.value as ItemCategory)}
-              className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+              className="min-h-[44px] min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
             >
               {ITEM_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
@@ -437,7 +437,7 @@ export function ShareItemModal({
               id="item-condition"
               value={condition}
               onChange={(e) => setCondition(e.target.value as ItemCondition)}
-              className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+              className="min-h-[44px] min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
             >
               {ITEM_CONDITIONS.map((cond) => (
                 <option key={cond} value={cond}>
@@ -463,7 +463,7 @@ export function ShareItemModal({
               value={neighborhood}
               onChange={(e) => setNeighborhood(e.target.value)}
               placeholder="e.g., Riverside"
-              className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
+              className="min-h-[44px] min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none sm:text-sm"
               required
             />
             {fieldErrors.neighborhood && (
@@ -484,7 +484,7 @@ export function ShareItemModal({
               step="1"
               value={replacementValue}
               onChange={(e) => setReplacementValue(e.target.value)}
-              className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] tabular-nums focus:border-[var(--blue)] focus:outline-none"
+              className="min-h-[44px] w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] tabular-nums focus:border-[var(--blue)] focus:outline-none sm:text-sm"
             />
             <p className="mt-1 text-xs font-medium text-[var(--muted)]">
               Used to estimate how much the community saves
@@ -508,7 +508,7 @@ export function ShareItemModal({
             value={rules}
             onChange={(e) => setRules(e.target.value)}
             placeholder="Pickup notes, care tips, or return expectations..."
-            className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
+            className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none sm:text-sm"
           />
         </div>
 

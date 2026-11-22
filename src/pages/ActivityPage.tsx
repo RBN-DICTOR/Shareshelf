@@ -370,7 +370,7 @@ export function ActivityPage({ onOpenShareModal, onEditItem }: ActivityPageProps
                       requestId: req.id,
                     })
                   }
-                  className="ml-auto"
+                  className="sm:ml-auto"
                 >
                   <MessageCircle className="h-4 w-4 text-[var(--blue)]" aria-hidden="true" />
                   Chat with {getFirstName(otherPerson.full_name)}

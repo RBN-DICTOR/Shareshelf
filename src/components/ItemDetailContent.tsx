@@ -423,7 +423,7 @@ export function ItemDetailContent({
                       }
                       setSubmitError(null);
                     }}
-                    className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+                    className="min-h-[44px] min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
                     required
                   />
                 </div>
@@ -443,7 +443,7 @@ export function ItemDetailContent({
                       setEndDate(e.target.value);
                       setSubmitError(null);
                     }}
-                    className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+                    className="min-h-[44px] min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
                     required
                   />
                 </div>
@@ -465,7 +465,7 @@ export function ItemDetailContent({
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Hi! I'd love to borrow this for a weekend project."
-                  className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
+                  className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none sm:text-sm"
                 />
               </div>
 

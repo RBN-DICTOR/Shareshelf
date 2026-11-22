@@ -48,7 +48,7 @@ function ShareShelfAppShell() {
   };
 
   return (
-    <div className="min-h-dvh bg-[var(--cream)] text-[var(--navy)]">
+    <div className="min-h-dvh max-w-full overflow-x-hidden overflow-x-clip bg-[var(--cream)] text-[var(--navy)]">
       <Navbar onOpenShareModal={openNewShareModal} />
 
       <AnimatePresence mode="wait">

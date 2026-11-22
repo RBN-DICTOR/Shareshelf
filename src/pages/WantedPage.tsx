@@ -391,7 +391,11 @@ export function WantedPage() {
         title="Ask your neighbors"
         maxWidthClass="max-w-lg"
       >
-        <form onSubmit={handleCreateSubmit} className="space-y-4 p-5 sm:p-6" noValidate>
+        <form
+          onSubmit={handleCreateSubmit}
+          className="space-y-4 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-6"
+          noValidate
+        >
           <div>
             <label htmlFor="want-title" className="mb-1 block text-sm font-bold text-[var(--navy)]">
               Item needed
@@ -402,7 +406,7 @@ export function WantedPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Pressure washer for patio"
-              className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+              className="min-h-[44px] w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
               required
             />
           </div>
@@ -417,7 +421,7 @@ export function WantedPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Share how long you need it for or any helpful specs."
-              className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+              className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
             />
           </div>
 
@@ -430,7 +434,7 @@ export function WantedPage() {
                 id="want-cat"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+                className="min-h-[44px] min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
               >
                 {ITEM_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -450,7 +454,7 @@ export function WantedPage() {
                 min={today}
                 value={neededBy}
                 onChange={(e) => setNeededBy(e.target.value)}
-                className="min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+                className="min-h-[44px] min-w-0 w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
                 required
               />
             </div>
@@ -466,7 +470,7 @@ export function WantedPage() {
               value={neighborhood}
               onChange={(e) => setNeighborhood(e.target.value)}
               placeholder="e.g., Riverside"
-              className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+              className="min-h-[44px] w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
               required
             />
           </div>
@@ -499,7 +503,7 @@ export function WantedPage() {
         maxWidthClass="max-w-lg"
       >
         {activeWant && (
-          <div className="space-y-5 p-5 sm:p-6">
+          <div className="space-y-5 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-6">
             <div className="rounded-2xl border border-[var(--line)] bg-white p-4">
               <p className="text-xs font-bold text-[var(--muted)]">
                 Asked by {activeWant.requester?.full_name || 'Neighbor'} · {activeWant.neighborhood}{' '}
@@ -558,7 +562,7 @@ export function WantedPage() {
                   value={replyMessage}
                   onChange={(e) => setReplyMessage(e.target.value)}
                   placeholder="I have one you can borrow"
-                  className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none"
+                  className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] focus:border-[var(--blue)] focus:outline-none sm:text-sm"
                   required
                 />
                 {replyError && (

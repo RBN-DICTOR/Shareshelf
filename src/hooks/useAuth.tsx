@@ -46,7 +46,12 @@ interface AuthContextValue {
   demoRole: DemoRole | null;
   authModalOpen: boolean;
   authModalReason: string | null;
-  openAuthModal: (reason?: string, onAuthenticated?: () => void) => void;
+  authModalTab: 'signin' | 'signup';
+  openAuthModal: (
+    reason?: string,
+    onAuthenticated?: () => void,
+    initialTab?: 'signin' | 'signup'
+  ) => void;
   closeAuthModal: () => void;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (input: {
@@ -77,6 +82,7 @@ export function AuthProvider({
   const [loading, setLoading] = useState<boolean>(supabaseReady);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalReason, setAuthModalReason] = useState<string | null>(null);
+  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin');
   const pendingActionRef = useRef<(() => void) | null>(null);
 
   const loadProfileForUser = useCallback(
@@ -166,11 +172,19 @@ export function AuthProvider({
     }
   }, []);
 
-  const openAuthModal = useCallback((reason?: string, onAuthenticated?: () => void) => {
-    pendingActionRef.current = onAuthenticated || null;
-    setAuthModalReason(reason || 'Sign in to continue. It only takes a minute.');
-    setAuthModalOpen(true);
-  }, []);
+  const openAuthModal = useCallback(
+    (
+      reason?: string,
+      onAuthenticated?: () => void,
+      initialTab: 'signin' | 'signup' = 'signin'
+    ) => {
+      pendingActionRef.current = onAuthenticated || null;
+      setAuthModalReason(reason || null);
+      setAuthModalTab(initialTab);
+      setAuthModalOpen(true);
+    },
+    []
+  );
 
   const closeAuthModal = useCallback(() => {
     setAuthModalOpen(false);
@@ -404,6 +418,7 @@ export function AuthProvider({
         demoRole,
         authModalOpen,
         authModalReason,
+        authModalTab,
         openAuthModal,
         closeAuthModal,
         signIn,

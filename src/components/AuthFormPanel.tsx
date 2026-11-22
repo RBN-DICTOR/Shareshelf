@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Package, Sparkles, UserCheck } from 'lucide-react';
 import { DEMO_USERS, useAuth, type DemoRole } from '../hooks/useAuth';
 import { Button } from './Button';
@@ -7,12 +7,22 @@ import { Ribbons } from './Ribbons';
 
 interface AuthFormPanelProps {
   reason?: string | null;
+  initialTab?: 'signin' | 'signup';
   onSuccess?: () => void;
 }
 
-export function AuthFormPanel({ reason, onSuccess }: AuthFormPanelProps) {
+export function AuthFormPanel({
+  reason,
+  initialTab = 'signin',
+  onSuccess,
+}: AuthFormPanelProps) {
   const { signIn, signUp, signInDemo } = useAuth();
-  const [tab, setTab] = useState<'signin' | 'signup'>('signin');
+  const [tab, setTab] = useState<'signin' | 'signup'>(initialTab);
+
+  useEffect(() => {
+    setTab(initialTab);
+    setError(null);
+  }, [initialTab]);
   const [fullName, setFullName] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
   const [email, setEmail] = useState('');
@@ -110,36 +120,38 @@ export function AuthFormPanel({ reason, onSuccess }: AuthFormPanelProps) {
       </div>
 
       {/* Right form panel */}
-      <div className="bg-white p-6 sm:p-8 lg:col-span-7">
-        <div className="mb-4 lg:hidden">
-          <Logo size={28} />
+      <div className="bg-white p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-8 lg:col-span-7">
+        <div className="mb-3 pr-12 lg:hidden">
+          <Logo size={26} />
         </div>
 
         {reason && (
-          <div className="mb-4 rounded-2xl border border-[var(--sun)] bg-[var(--sun-soft)] px-4 py-2.5 text-sm font-bold text-[var(--navy)]">
+          <div className="mb-4 rounded-2xl border border-[var(--sun)] bg-[var(--sun-soft)] px-3.5 py-2.5 text-xs sm:text-sm font-bold text-[var(--navy)]">
             {reason}
           </div>
         )}
 
         {/* Prototype demo box */}
-        <div className="mb-6 rounded-3xl border border-[var(--line)] bg-[var(--cream)] p-4">
-          <div className="flex items-center justify-between gap-2">
+        <div className="mb-4 rounded-2xl border border-[var(--line)] bg-[var(--cream)] p-3 sm:mb-6 sm:rounded-3xl sm:p-4">
+          <div className="flex flex-wrap items-center justify-between gap-1.5">
             <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[var(--blue)]">
-              <UserCheck className="h-4 w-4" aria-hidden="true" />
+              <UserCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
               Prototype demo
             </span>
-            <span className="text-xs font-bold text-[var(--muted)]">Instant sign-in</span>
+            <span className="text-[11px] font-bold text-[var(--muted)] sm:text-xs">
+              Instant sign-in
+            </span>
           </div>
           <p className="mt-1 text-xs font-medium text-[var(--navy)]/80">
             Explore both sides of a borrow exchange in one click.
           </p>
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="mt-2.5 grid grid-cols-1 gap-2 sm:mt-3 sm:grid-cols-2">
             <Button
               variant="navy"
               loading={demoLoading === 'alex'}
               disabled={demoLoading !== null || submitting}
               onClick={() => handleDemo('alex')}
-              className="w-full px-4 text-xs"
+              className="min-h-[40px] w-full px-3 py-2 text-center text-xs leading-tight whitespace-normal"
             >
               Continue as {DEMO_USERS.alex.name} ({DEMO_USERS.alex.roleLabel})
             </Button>
@@ -148,7 +160,7 @@ export function AuthFormPanel({ reason, onSuccess }: AuthFormPanelProps) {
               loading={demoLoading === 'jordan'}
               disabled={demoLoading !== null || submitting}
               onClick={() => handleDemo('jordan')}
-              className="w-full px-4 text-xs"
+              className="min-h-[40px] w-full px-3 py-2 text-center text-xs leading-tight whitespace-normal"
             >
               Continue as {DEMO_USERS.jordan.name} ({DEMO_USERS.jordan.roleLabel})
             </Button>
@@ -165,7 +177,7 @@ export function AuthFormPanel({ reason, onSuccess }: AuthFormPanelProps) {
               setTab('signin');
               setError(null);
             }}
-            className={`flex-1 rounded-full py-2 text-sm font-bold transition-colors ${
+            className={`min-h-[40px] flex-1 rounded-full py-2 text-sm font-bold transition-colors ${
               tab === 'signin'
                 ? 'bg-[var(--navy)] text-white shadow-sm'
                 : 'text-[var(--muted)] hover:text-[var(--navy)]'
@@ -181,7 +193,7 @@ export function AuthFormPanel({ reason, onSuccess }: AuthFormPanelProps) {
               setTab('signup');
               setError(null);
             }}
-            className={`flex-1 rounded-full py-2 text-sm font-bold transition-colors ${
+            className={`min-h-[40px] flex-1 rounded-full py-2 text-sm font-bold transition-colors ${
               tab === 'signup'
                 ? 'bg-[var(--navy)] text-white shadow-sm'
                 : 'text-[var(--muted)] hover:text-[var(--navy)]'
@@ -191,10 +203,10 @@ export function AuthFormPanel({ reason, onSuccess }: AuthFormPanelProps) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4" noValidate>
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5 sm:mt-5 sm:space-y-4" noValidate>
           {tab === 'signup' && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
+              <div className="min-w-0">
                 <label
                   htmlFor="auth-fullname"
                   className="mb-1 block text-sm font-bold text-[var(--navy)]"
@@ -207,11 +219,11 @@ export function AuthFormPanel({ reason, onSuccess }: AuthFormPanelProps) {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Samira Patel"
-                  className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
+                  className="min-h-[44px] w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none sm:text-sm"
                   required
                 />
               </div>
-              <div>
+              <div className="min-w-0">
                 <label
                   htmlFor="auth-neighborhood"
                   className="mb-1 block text-sm font-bold text-[var(--navy)]"
@@ -224,7 +236,7 @@ export function AuthFormPanel({ reason, onSuccess }: AuthFormPanelProps) {
                   value={neighborhood}
                   onChange={(e) => setNeighborhood(e.target.value)}
                   placeholder="Riverside"
-                  className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
+                  className="min-h-[44px] w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none sm:text-sm"
                   required
                 />
               </div>
@@ -245,7 +257,7 @@ export function AuthFormPanel({ reason, onSuccess }: AuthFormPanelProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
+              className="min-h-[44px] w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none sm:text-sm"
               required
             />
           </div>
@@ -264,7 +276,7 @@ export function AuthFormPanel({ reason, onSuccess }: AuthFormPanelProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
-              className="w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none"
+              className="min-h-[44px] w-full rounded-[14px] border border-[var(--line)] bg-white px-3.5 py-2.5 text-base font-medium text-[var(--navy)] placeholder:text-[var(--muted)]/70 focus:border-[var(--blue)] focus:outline-none sm:text-sm"
               required
             />
           </div>

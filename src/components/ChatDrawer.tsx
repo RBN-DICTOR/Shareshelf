@@ -385,7 +385,7 @@ export function ChatDrawer() {
               {/* Message composer */}
               <form
                 onSubmit={handleFormSubmit}
-                className="border-t border-[var(--line)] bg-white p-3 sm:px-4"
+                className="border-t border-[var(--line)] bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4"
               >
                 {sendError && (
                   <p role="alert" className="mb-2 text-xs font-bold text-[var(--danger)]">
@@ -400,7 +400,7 @@ export function ChatDrawer() {
                     maxLength={1000}
                     placeholder={`Message ${getFirstName(activeConversation.recipient.full_name)}...`}
                     aria-label="Write a message"
-                    className="min-h-[44px] min-w-0 flex-1 rounded-full border border-[var(--line)] bg-[var(--cream)] px-4 py-2 text-sm font-medium text-[var(--navy)] placeholder:text-[var(--muted)] focus:border-[var(--blue)] focus:bg-white focus:outline-none"
+                    className="min-h-[44px] min-w-0 flex-1 rounded-full border border-[var(--line)] bg-[var(--cream)] px-4 py-2 text-base font-medium text-[var(--navy)] placeholder:text-[var(--muted)] focus:border-[var(--blue)] focus:bg-white focus:outline-none sm:text-sm"
                   />
                   <Button
                     type="submit"

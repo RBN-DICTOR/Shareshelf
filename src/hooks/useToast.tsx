@@ -66,7 +66,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="pointer-events-none fixed bottom-28 left-1/2 z-50 flex w-[min(92vw,380px)] -translate-x-1/2 flex-col items-center gap-2 lg:bottom-6 lg:left-auto lg:right-6 lg:translate-x-0 lg:items-end"
+        className="pointer-events-none fixed inset-x-3 bottom-28 z-50 mx-auto flex max-w-sm flex-col items-center gap-2 lg:inset-x-auto lg:bottom-6 lg:right-6 lg:w-[380px] lg:items-end"
       >
         <AnimatePresence>
           {toasts.map((toast) => {
@@ -98,7 +98,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                     <CheckCircle2 className="h-4 w-4 text-[var(--sun)]" aria-hidden="true" />
                   )}
                 </span>
-                <span className="flex-1 leading-snug">{toast.message}</span>
+                <span className="min-w-0 flex-1 break-words leading-snug">{toast.message}</span>
                 <button
                   type="button"
                   onClick={() => dismissToast(toast.id)}

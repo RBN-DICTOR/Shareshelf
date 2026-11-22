@@ -494,11 +494,11 @@ export function PngCreator({
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
           <button
             type="button"
             onClick={handleDownloadPng}
-            className="inline-flex min-h-[38px] items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 text-xs font-bold text-[var(--navy)] hover:bg-[var(--sun-soft)]"
+            className="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-3.5 py-1.5 text-xs font-bold text-[var(--navy)] hover:bg-[var(--sun-soft)] sm:flex-initial"
           >
             <Download className="h-3.5 w-3.5" aria-hidden="true" />
             Save .png
@@ -508,7 +508,7 @@ export function PngCreator({
             type="button"
             disabled={disabled || attaching}
             onClick={handleUsePng}
-            className="inline-flex min-h-[38px] items-center gap-1.5 rounded-full bg-[var(--blue)] px-4 py-1.5 text-xs font-bold text-white hover:bg-[var(--blue-deep)] disabled:opacity-60"
+            className="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--blue)] px-4 py-1.5 text-xs font-bold text-white hover:bg-[var(--blue-deep)] disabled:opacity-60 sm:flex-initial"
           >
             <Check className="h-3.5 w-3.5" aria-hidden="true" />
             {attaching ? 'Attaching PNG...' : 'Use this PNG'}
