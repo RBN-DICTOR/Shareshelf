@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@theme {
+  --color-blue: #0B57F0;
+  --color-blue-deep: #0847C4;
+  --color-blue-soft: #E3ECFF;
+  --color-orange: #F5811F;
+  --color-coral: #FF9A4D;
+  --color-orange-soft: #FFE6D0;
+  --color-sun: #FFC531;
+  --color-sun-soft: #FFF1C7;
+  --color-cream: #FFFBF5;
+  --color-navy: #14163D;
+  --color-muted: #6B6F8D;
+  --color-line: #EDE6DA;
+  --color-danger: #D93C3C;
+
+  --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
+  --font-display: "Manrope", system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  --blue: #0B57F0;
+  --blue-deep: #0847C4;
+  --blue-soft: #E3ECFF;
+  --orange: #F5811F;
+  --orange-soft: #FFE6D0;
+  --coral: #FF9A4D;
+  --sun: #FFC531;
+  --sun-soft: #FFF1C7;
+  --cream: #FFFBF5;
+  --white: #FFFFFF;
+  --navy: #14163D;
+  --muted: #6B6F8D;
+  --line: #EDE6DA;
+  --danger: #D93C3C;
+  --shadow: 0 10px 30px rgba(20, 22, 61, 0.08);
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--cream);
+  color: var(--navy);
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--navy);
+  font-family: "Manrope", system-ui, sans-serif;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.shadow-soft {
+  box-shadow: var(--shadow);
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #F3ECDD 25%, #FFF7E6 37%, #F3ECDD 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+.ribbon-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 2.2s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .ribbon-path {
+    stroke-dashoffset: 0;
+  }
+}

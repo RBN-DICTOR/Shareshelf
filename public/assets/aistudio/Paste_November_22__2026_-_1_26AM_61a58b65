@@ -1,0 +1,514 @@
+# ShareShelf v2: Ribbon Brand + Animated UI Prompt for AI Studio
+
+The Supabase SQL (Part 2 of `shareshelf-ai-studio-prompt.md`) is **unchanged**. Run it first if you haven't. Then paste the prompt below into AI Studio.
+
+## Brand direction taken from your reference image
+- **Palette:** royal blue, sunny orange, golden yellow on a warm cream background, with deep navy text.
+- **Signature motif:** thick, rounded **ribbon lines** that loop across the page, plus a golden **wave** at the bottom of the hero. For ShareShelf the loop means *things go out and come back*, which is the borrowing cycle.
+- **Type and shape:** one rounded geometric sans (Manrope), big bold headlines, pill buttons (a dark navy one and a soft orange one), generous space.
+- **Original identity:** the name, logo mark and copy are ShareShelf's own. Only the style direction comes from the reference.
+
+---COPY FROM HERE---
+
+You are a senior product designer and full-stack engineer. Build a complete, polished, production-quality web app called **ShareShelf**, a neighborhood item-sharing platform, for a social-good hackathon. It must be fully working end to end, with real data in Supabase. Write complete code for every screen and flow. No placeholders, no TODOs.
+
+## 1. PRODUCT
+Tagline: **Borrow what you need. Share what you have.**
+People borrow everyday items (tools, books, electronics, camping gear, event supplies) from neighbors instead of buying things they only need briefly. Core journey: **Discover > Request > Approve > Borrow > Return > Complete.** The brand idea is **the loop**: things go out into the community and come back.
+
+## 2. STACK
+- React + TypeScript (use `any` where typing gets in the way so everything compiles), Tailwind CSS, `lucide-react`, `react-router-dom` (HashRouter), **`framer-motion`** for animation, `@supabase/supabase-js`.
+- All data comes from Supabase. No hard-coded mock data in the UI.
+- Read `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (also try `process.env` equivalents). If missing, show a friendly one-time "Connect Supabase" screen (Project URL + anon key fields), save in localStorage, and continue. Never crash on missing config.
+- Files: `lib/supabase.ts`, `lib/api.ts` (all queries), `hooks/`, `components/`, `pages/`, `index.css`.
+
+## 3. DATABASE (already created, use exactly these names)
+- `profiles(id, full_name, neighborhood)`
+- `items(id, owner_id, name, description, category, condition, image_url, neighborhood, is_available, rules, replacement_value, is_demo, created_at)`
+- `borrow_requests(id, item_id, borrower_id, owner_id, start_date, end_date, message, status, is_demo, created_at, updated_at)`; status is one of `pending, approved, rejected, active, return_requested, completed, cancelled`
+- `item_wants(id, requester_id, title, description, category, neighborhood, needed_by, status, is_demo, created_at)`
+- `want_responses(id, want_id, responder_id, message, created_at)`
+- `notifications(id, user_id, message, is_read, created_at)`
+- Views: `item_busy_dates(item_id, start_date, end_date, status)` (reserved ranges, readable by everyone) and `community_impact(items_listed, completed_exchanges, borrowed_now, money_saved, items_reused, demo_items)`.
+- Storage bucket `item-images` (public) for photos.
+- Notifications are created by database triggers. Do NOT insert them from the client. The database rejects overlapping reserved loans and invalid status changes, so catch those errors and show plain messages ("Those dates are already reserved for this item.").
+- Categories: Tools, Electronics, Education, Household, Outdoor, Events, Sports, Other. Conditions: Like new, Good, Fair.
+
+## 4. BRAND SYSTEM (follow exactly)
+**Feeling:** bold, joyful, trustworthy, a social-impact startup that could launch publicly. Warm cream canvas, big confident type, flowing ribbon lines, golden wave shapes. Clean and spacious, never cluttered, never a generic ecommerce template.
+
+**Colors (CSS variables, also added to the Tailwind theme):**
+blue `#0B57F0` (primary brand, links, active states), blue-deep `#0847C4` (hover), blue-soft `#E3ECFF`, orange `#F5811F`, coral `#FF9A4D` (soft orange button), orange-soft `#FFE6D0`, sun `#FFC531` (golden yellow shapes and highlights), sun-soft `#FFF1C7`, cream `#FFFBF5` (page background), white `#FFFFFF` (cards), navy `#14163D` (text and the dark pill button), muted `#6B6F8D`, line `#EDE6DA`, danger `#D93C3C`.
+Use blue for primary actions and active states, orange for the main call to action, yellow for shapes and soft fills. Keep navy text on yellow (never gray text on yellow).
+
+**Type:** **Manrope** from Google Fonts for everything. Headlines weight 800 with tight tracking (-0.03em), UI weight 600-700, body 500. Sentence case, no all-caps labels.
+
+**Shape:** cards 24px radius, buttons and chips fully pill-shaped (44px min height), inputs 14px radius, soft shadow `0 10px 30px rgba(20,22,61,.08)`, hairline borders `#EDE6DA`.
+
+**Logo:** the "loop mark" plus wordmark. Build it as a `Logo` component: an orange open ring with a blue dot in the center, then "ShareShelf" in Manrope 800, blue. Use it as the favicon too.
+```
+<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="14" fill="none" stroke="#F5811F" stroke-width="6" stroke-linecap="round" stroke-dasharray="70 18" transform="rotate(-60 24 24)"/><circle cx="24" cy="24" r="5" fill="#0B57F0"/></svg>
+```
+
+**Signature motif: ribbons.** Thick (22-26px) rounded blue and orange stroke paths that sweep and loop behind the hero, the auth page and the Impact header. They draw themselves in on load. A golden-yellow wave fills the bottom of the hero. Use ribbons only as decoration behind content (never behind small text), as shown in the components below.
+
+**Motion principles:** purposeful and fluid. Springs for movement, 150-300ms for fades. Animate: page changes, the nav indicator, the hero ribbons and headline, card hover lift, modals and sheets, toasts, status steppers, count-up numbers, skeleton loading, and a small celebration when a loan completes. Respect `prefers-reduced-motion` (everything becomes instant).
+
+## 5. NAVIGATION (effortless and animated)
+**Desktop (>=1024px):** sticky top bar on cream with backdrop blur. Left: logo. Center: a white pill container with **Discover, Wanted board, My activity, Impact**; the active item has a navy pill that **slides** between items (shared layout animation). Right: orange **Share an item** button, notification bell with an unread badge and an animated dropdown, and an avatar menu (name, neighborhood, "Switch to Jordan/Alex" for demo accounts, Sign out).
+**Mobile (<1024px):** slim top bar (logo left, bell and avatar right) and a **fixed bottom tab bar** with Discover, Wanted, a raised orange circular **+ Share** button in the center, Activity (with an orange badge showing how many things need the user's action) and Impact. The active tab gets a sliding yellow bubble behind its icon. Respect safe-area insets. All touch targets at least 44px.
+Routes: `/` Discover, `/wanted`, `/activity`, `/impact`, `/item/:id`, `/auth`. Page changes use a soft fade-and-rise transition (`AnimatePresence mode="wait"` keyed by pathname).
+Browsing (Discover, Wanted, Impact, item details) works **without** signing in. Actions that need an account open a friendly sign-in sheet, then continue where the user left off.
+
+## 6. AUTH
+Supabase email + password. Two-panel layout on desktop (left: blue panel with the logo, tagline, animated ribbons and a short line "Join your neighbors. Share what you have."; right: form), single column on mobile. Tabs for **Sign in** and **Create account** (full name, neighborhood, email, password). Inline validation, friendly errors.
+Add a clearly labeled **"Prototype demo"** card with two buttons that sign in instantly: **Continue as Alex Morgan (item owner)** = `alex@shareshelf.demo` and **Continue as Jordan Lee (borrower)** = `jordan@shareshelf.demo`, both with password `ShareShelf!2026`. The avatar menu has **Switch to Jordan / Switch to Alex** for these accounts. Show a small "Prototype demo" tag near the logo.
+
+## 7. SCREENS
+
+### Discover (`/`)
+- **Hero** (use the `Hero` component below): headline "Good things are better when shared.", supporting text "Borrow everyday essentials from your community, save money, and give useful things a second life.", buttons **Explore items** (navy) and **Share an item** (orange), a white pill "Your neighborhood is full of things worth sharing.", and on the right four real items from Supabase as floating cards on the ribbons. Do NOT invent user counts or statistics.
+- A dismissible **"How the loop works"** strip with three animated steps: 1 Request, 2 Get approved, 3 Return. Tiny copy: "New here? Browse, request, return. That's the whole loop."
+- **Search** (large rounded input, icon, clear button, live filtering by name, description, category, neighborhood), **category chips** with a sliding blue active pill, a neighborhood dropdown and an "Available now" toggle, plus a result count.
+- **Item grid** (1/2/3/4 columns) of `ItemCard`s with staggered reveal on scroll. Loading: `SkeletonCard`s. Empty: "Nothing matches yet" with buttons "Clear filters" and "Ask your neighbors".
+
+### Item details (sheet on mobile, centered modal on desktop)
+Large image, name, category, condition, description, owner card, borrowing rules, FREE label, a **reserved dates** strip from `item_busy_dates`, and a short "How borrowing works" explainer. **Request to borrow** reveals the form inside the same sheet: start date, return date (min = today), optional message with a 300-character counter. Validate: not in the past, return not before start, no overlap with reserved ranges (inline: "Those dates overlap a reserved loan. Try another range."). On submit insert into `borrow_requests` (`status='pending'`, `owner_id` from the item), toast, then go to Activity > My requests. Owner viewing their own item sees "This is your item" with Edit and Remove.
+
+### My activity (`/activity`)
+Requires sign-in. Greeting "Hi, {first name}" with a one-line summary ("2 things need your attention"). Scrollable tabs with counts and a sliding underline: **My items, Incoming requests, Items I'm borrowing, My requests, Active loans, Completed exchanges**. Open on the tab with the most urgent action.
+Each request is a card with the item thumbnail and name, the other person, dates, message, an animated **Stepper** (Requested > Approved > Picked up > Returned > Complete), a status badge, and role-based actions:
+- Owner, `pending`: **Approve** (blue) and **Decline** (danger outline).
+- Borrower, `pending` or `approved`: **Cancel request**.
+- Borrower, `approved`: **I picked it up** (status `active`).
+- Borrower, `active`: **Request return confirmation** (status `return_requested`).
+- Owner, `return_requested`: **Confirm item returned** (status `completed`) and trigger `LoopBurst`.
+Actions update Supabase with optimistic UI and rollback on error. **My items** tab: item list with availability toggle, Edit, Remove (confirmation sheet; block removal while a loan is approved or active, explaining why) and an **Add item** button. Every tab has a friendly empty state.
+
+### Share an item (sheet on mobile, modal on desktop; also used for Edit)
+Fields: name, description, category, condition, **photo upload** to `item-images` (drag and drop on desktop, camera/gallery on mobile, preview and remove) with an optional image URL alternative, neighborhood, availability, borrowing instructions, estimated replacement value in USD ("Used to estimate how much the community saves"). Inline validation. On save: toast, and the item appears in Discover immediately with a gentle entrance animation.
+
+### Wanted board (`/wanted`)
+Headline "Can't find it? Ask your neighbors." **Request an item** opens a form (item needed, description, category, neighborhood, date needed). Cards show title, description, category, neighborhood, "Needed by" date, requester, response count, **Respond** button. Respond opens a sheet listing responses plus a message box. The requester can mark it **fulfilled** or delete it. Category filter chips. Empty state invites the first request.
+
+### Impact (`/impact`)
+Read from the `community_impact` view only. Header with ribbons. Five big number cards using `CountUp` (animates when scrolled into view): **Items listed, Completed exchanges, Borrowed right now, Estimated money saved ($), Items reused**. Add a simple animated bar chart of items by category (computed from `items`, bars grow on view). A "How we calculate this" card: money saved is the sum of the estimated replacement value of items in completed exchanges; items reused counts distinct items borrowed and returned. Clear note: "Includes {demo_items} demonstration items. Figures are estimates, not real-world results." Never present fabricated statistics.
+
+### Notifications
+Bell dropdown (desktop, animated) and full-screen list (mobile) from the `notifications` table with relative times, unread highlight and "Mark all as read". Realtime arrivals also appear as toasts.
+
+## 8. REALTIME
+Subscribe to `borrow_requests`, `notifications`, `items`, `item_wants` so when Alex approves, Jordan's screen updates without refresh. Clean up on unmount.
+
+## 9. UX QUALITY BAR
+- Every button and link does something real. No decorative controls.
+- Skeleton loading, empty states, inline validation, plain-language error toasts, disabled and spinner states while saving.
+- Fully responsive. No horizontal overflow at 360px. Modals become bottom sheets on mobile and scroll inside the viewport.
+- Accessible: semantic HTML, labeled inputs, visible focus rings (3px blue outline), AA contrast, Esc closes dialogs, `aria-live` toasts, reduced-motion support.
+- Escape and trim all user input. Handle every Supabase error without crashing.
+
+## 10. MESSAGING (use these exact words; keep this warm, plain, neighborly voice everywhere)
+**Section titles:** Discover: "Find something nearby". Wanted: "Can't find it? Ask your neighbors." Impact: "What sharing adds up to". Activity: "Hi, {name}".
+**Button verbs:** Request to borrow, Approve, Decline, Cancel request, I picked it up, Request return confirmation, Confirm item returned, Share an item, Respond, Mark as fulfilled.
+**Human status labels:** pending = "Waiting for approval", approved = "Approved, ready for pickup", active = "Out on loan", return_requested = "Return pending", completed = "All done", rejected = "Not approved this time", cancelled = "Cancelled".
+**Toasts:** request sent = "Request sent to {name}. They'll reply soon." | approved = "Approved! {name} can pick it up." | declined = "Request declined. There's always another item." | cancelled = "Request cancelled." | picked up = "Enjoy it! Remember the return date." | return requested = "Return noted. Waiting for {name} to confirm." | return confirmed = "Loop complete! Thanks for sharing." | item listed = "{item} is on the shelf. Thanks for sharing!" | item updated = "Changes saved." | item removed = "Item removed." | want posted = "Request posted. Your neighbors can see it now." | response sent = "Response sent. {name} will be notified." | sign in needed = "Sign in to continue. It only takes a minute." | date clash = "Those dates are already reserved. Try another range." | network error = "Something went wrong. Check your connection and try again."
+**Empty states:** My items = "Nothing on your shelf yet. Share your first item." | Incoming = "No requests waiting. They'll show up here." | Borrowing = "You're not borrowing anything right now. Browse items." | My requests = "No requests yet. Find something you need." | Active loans = "None of your items are out on loan." | Completed = "Your finished exchanges will appear here." | Wanted = "No requests yet. Be the first to ask." | Notifications = "You're all caught up." | Search = "Nothing matches yet. Try another word."
+**Not found page:** "This page took a trip. Let's get you back to the shelf." with a button to Discover.
+
+## 11. COMPONENT LIBRARY (use this code as the base; adapt as needed, do not skip any)
+
+### index.css
+```css
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+:root{
+  --blue:#0B57F0; --blue-deep:#0847C4; --blue-soft:#E3ECFF;
+  --orange:#F5811F; --orange-soft:#FFE6D0; --coral:#FF9A4D;
+  --sun:#FFC531; --sun-soft:#FFF1C7;
+  --cream:#FFFBF5; --navy:#14163D; --muted:#6B6F8D; --line:#EDE6DA; --danger:#D93C3C;
+  --shadow:0 10px 30px rgba(20,22,61,.08);
+}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--navy);font-family:'Manrope',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:0}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:12px}
+.no-scrollbar{scrollbar-width:none}.no-scrollbar::-webkit-scrollbar{display:none}
+.shimmer{background:linear-gradient(90deg,#F3ECDD 25%,#FFF7E6 37%,#F3ECDD 63%);background-size:400% 100%;animation:shimmer 1.4s infinite}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+.ribbon-path{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.2s cubic-bezier(.65,0,.35,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .ribbon-path{stroke-dashoffset:0}
+}
+```
+Also configure Tailwind's theme (colors blue, orange, sun, cream, navy, muted, line) and `fontFamily.sans = ['Manrope','system-ui','sans-serif']`.
+
+### Ribbons.tsx (self-drawing ribbon lines)
+```tsx
+export function Ribbons() {
+  return (
+    <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden>
+      <path className="ribbon-path" pathLength={1} fill="none" stroke="#0B57F0" strokeWidth="26" strokeLinecap="round"
+        d="M-40 520 C 240 640, 520 420, 760 330 C 1000 240, 1060 80, 930 70 C 800 62, 790 230, 960 280 C 1080 315, 1180 250, 1260 120" />
+      <path className="ribbon-path" style={{ animationDelay: '.3s' }} pathLength={1} fill="none" stroke="#F5811F" strokeWidth="22" strokeLinecap="round"
+        d="M-60 120 C 200 40, 420 200, 640 250 C 860 300, 1000 200, 1280 420" />
+    </svg>
+  );
+}
+```
+
+### Button.tsx
+```tsx
+import { motion } from 'framer-motion';
+const styles: any = {
+  navy: 'bg-[var(--navy)] text-white hover:bg-black',
+  orange: 'bg-[var(--coral)] text-white hover:bg-[var(--orange)]',
+  blue: 'bg-[var(--blue)] text-white hover:bg-[var(--blue-deep)]',
+  ghost: 'bg-white text-[var(--navy)] border border-[var(--line)] hover:bg-[var(--sun-soft)]',
+  danger: 'bg-white text-[var(--danger)] border border-[var(--danger)] hover:bg-red-50',
+};
+export function Button({ variant = 'navy', loading = false, children, className = '', ...p }: any) {
+  return (
+    <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }} transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      disabled={loading || p.disabled}
+      className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold transition-colors disabled:opacity-60 ${styles[variant]} ${className}`} {...p}>
+      {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-current/30 border-t-current" />}
+      {children}
+    </motion.button>
+  );
+}
+```
+
+### Motion helpers: Reveal, Headline, Page, CountUp
+```tsx
+import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion';
+import { useEffect, useRef } from 'react';
+
+export const Reveal = ({ children, delay = 0 }: any) => (
+  <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }}
+    transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div>
+);
+
+export function Headline({ text }: { text: string }) {
+  return (
+    <h1 className="text-5xl md:text-7xl">
+      {text.split(' ').map((w, i) => (
+        <span key={i} className="inline-block overflow-hidden align-bottom">
+          <motion.span className="inline-block" initial={{ y: '110%' }} animate={{ y: 0 }}
+            transition={{ delay: 0.1 + i * 0.07, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>{w}&nbsp;</motion.span>
+        </span>
+      ))}
+    </h1>
+  );
+}
+
+export const Page = ({ children }: any) => (
+  <motion.main initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>{children}</motion.main>
+);
+
+export function CountUp({ to, prefix = '', duration = 1.2 }: any) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+  const mv = useMotionValue(0);
+  const text = useTransform(mv, (v) => prefix + Math.round(v).toLocaleString());
+  useEffect(() => { if (inView) { const c = animate(mv, to, { duration, ease: 'easeOut' }); return () => c.stop(); } }, [inView, to]);
+  return <motion.span ref={ref}>{text}</motion.span>;
+}
+```
+Route transitions: wrap routes with `<AnimatePresence mode="wait"><Routes location={location} key={location.pathname}>...</Routes></AnimatePresence>` and wrap each page in `<Page>`.
+
+### Navigation.tsx (sliding pill nav + mobile tab bar)
+```tsx
+import { motion, LayoutGroup } from 'framer-motion';
+import { NavLink } from 'react-router-dom';
+import { Compass, Hand, Inbox, Sparkles, Plus } from 'lucide-react';
+
+const links = [['/', 'Discover'], ['/wanted', 'Wanted board'], ['/activity', 'My activity'], ['/impact', 'Impact']];
+
+export function TopNav({ unread, onShare }: any) {
+  return (
+    <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--cream)]/85 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+        <Logo />
+        <LayoutGroup id="topnav">
+          <nav className="hidden gap-1 rounded-full bg-white p-1 shadow-[var(--shadow)] lg:flex">
+            {links.map(([to, label]) => (
+              <NavLink key={to} to={to} end={to === '/'} className="relative rounded-full px-4 py-2 text-sm font-bold">
+                {({ isActive }: any) => (<>
+                  {isActive && <motion.span layoutId="navpill" className="absolute inset-0 rounded-full bg-[var(--navy)]" transition={{ type: 'spring', stiffness: 400, damping: 32 }} />}
+                  <span className={`relative ${isActive ? 'text-white' : 'text-[var(--navy)]'}`}>{label}</span>
+                </>)}
+              </NavLink>
+            ))}
+          </nav>
+        </LayoutGroup>
+        <div className="flex items-center gap-2">
+          <Button variant="orange" onClick={onShare} className="hidden sm:inline-flex">Share an item</Button>
+          {/* Build <Bell count={unread}/> with an animated dropdown and <AvatarMenu/> per the spec */}
+        </div>
+      </div>
+    </header>
+  );
+}
+
+export function TabBar({ badge, onShare }: any) {
+  const tab = ([to, label, Icon]: any) => (
+    <li key={to}>
+      <NavLink to={to} end={to === '/'} className="relative flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[11px] font-bold">
+        {({ isActive }: any) => (<>
+          {isActive && <motion.span layoutId="tabbubble" className="absolute top-1.5 h-8 w-14 rounded-full bg-[var(--sun-soft)]" transition={{ type: 'spring', stiffness: 400, damping: 32 }} />}
+          <Icon className={`relative h-5 w-5 ${isActive ? 'text-[var(--blue)]' : 'text-[var(--muted)]'}`} />
+          <span className={`relative ${isActive ? 'text-[var(--navy)]' : 'text-[var(--muted)]'}`}>{label}</span>
+          {label === 'Activity' && badge > 0 && (
+            <span className="absolute right-4 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[var(--orange)] px-1 text-[10px] text-white">{badge}</span>
+          )}
+        </>)}
+      </NavLink>
+    </li>
+  );
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)] bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      <ul className="mx-auto grid max-w-md grid-cols-5 items-center">
+        {[['/', 'Discover', Compass], ['/wanted', 'Wanted', Hand]].map(tab)}
+        <li className="flex justify-center">
+          <motion.button whileTap={{ scale: 0.9 }} onClick={onShare} aria-label="Share an item"
+            className="-mt-7 grid h-14 w-14 place-items-center rounded-full bg-[var(--orange)] text-white shadow-lg"><Plus /></motion.button>
+        </li>
+        {[['/activity', 'Activity', Inbox], ['/impact', 'Impact', Sparkles]].map(tab)}
+      </ul>
+    </nav>
+  );
+}
+```
+
+### Hero.tsx
+```tsx
+export function Hero({ items, onExplore, onShare }: any) {
+  const pos = [[0, 0, -6], [48, 6, 5], [10, 50, 3], [52, 46, -4]];
+  return (
+    <section className="relative overflow-hidden bg-[var(--cream)]">
+      <svg className="absolute inset-x-0 bottom-0 h-[65%] w-full" viewBox="0 0 1200 420" preserveAspectRatio="none" aria-hidden>
+        <path d="M0 420V180C220 90 470 190 700 130C900 80 1050 110 1200 150V420Z" fill="#FFC531" />
+      </svg>
+      <Ribbons />
+      <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-28">
+        <div>
+          <Headline text="Good things are better when shared." />
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+            className="mt-5 max-w-md text-lg font-semibold text-[var(--navy)]/80">
+            Borrow everyday essentials from your community, save money, and give useful things a second life.
+          </motion.p>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="mt-8 flex flex-wrap gap-3">
+            <Button onClick={onExplore}>Explore items</Button>
+            <Button variant="orange" onClick={onShare}>Share an item</Button>
+          </motion.div>
+          <span className="mt-6 inline-block rounded-full bg-white px-4 py-2 text-sm font-bold shadow-[var(--shadow)]">Your neighborhood is full of things worth sharing.</span>
+        </div>
+        <div className="relative h-[320px]">
+          {items.slice(0, 4).map((it: any, i: number) => (
+            <div key={it.id} className="absolute w-36 rounded-3xl bg-white p-2 shadow-xl md:w-40"
+              style={{ left: `${pos[i][0]}%`, top: `${pos[i][1]}%`, rotate: `${pos[i][2]}deg`, animation: `float 5s ease-in-out ${i * 0.7}s infinite` }}>
+              <div className="aspect-square overflow-hidden rounded-2xl"><ItemImage item={it} className="h-full w-full object-cover" /></div>
+              <p className="truncate px-1 pt-2 text-sm font-extrabold">{it.name}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+### ItemCard.tsx, ItemImage, SkeletonCard
+```tsx
+import { Wrench, Plug, BookOpen, Home, Tent, PartyPopper, Trophy, Package } from 'lucide-react';
+import { useState } from 'react';
+const icons: any = { Tools: Wrench, Electronics: Plug, Education: BookOpen, Household: Home, Outdoor: Tent, Events: PartyPopper, Sports: Trophy, Other: Package };
+
+export function ItemImage({ item, className = '' }: any) {
+  const [bad, setBad] = useState(!item.image_url);
+  const Icon = icons[item.category] || Package;
+  if (bad) return <div className={`grid place-items-center bg-[var(--sun-soft)] ${className}`}><Icon className="h-14 w-14 text-[var(--blue)]/70" /></div>;
+  return <img src={item.image_url} alt={item.name} loading="lazy" onError={() => setBad(true)} className={className} />;
+}
+
+export function ItemCard({ item, onOpen }: any) {
+  const status = item.on_loan ? 'On loan' : item.is_available ? 'Available' : 'Unavailable';
+  return (
+    <motion.article layout whileHover={{ y: -6 }} transition={{ type: 'spring', stiffness: 300, damping: 22 }} onClick={() => onOpen(item.id)}
+      className="group cursor-pointer overflow-hidden rounded-3xl border border-[var(--line)] bg-white shadow-[var(--shadow)]">
+      <div className="relative aspect-[4/3] overflow-hidden bg-[var(--sun-soft)]">
+        <ItemImage item={item} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-bold ${status === 'Available' ? 'bg-[var(--blue)] text-white' : 'bg-white text-[var(--muted)]'}`}>{status}</span>
+      </div>
+      <div className="space-y-1 p-4">
+        <p className="text-xs font-bold text-[var(--orange)]">{item.category}</p>
+        <h3 className="text-lg">{item.name}</h3>
+        <p className="text-sm font-medium text-[var(--muted)]">{item.neighborhood} · {item.condition}</p>
+        <div className="flex items-center justify-between pt-2">
+          <span className="rounded-full bg-[var(--sun-soft)] px-3 py-1 text-xs font-extrabold">FREE</span>
+          <span className="text-sm font-bold text-[var(--blue)]">View details →</span>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
+export const SkeletonCard = () => (
+  <div className="overflow-hidden rounded-3xl border border-[var(--line)] bg-white">
+    <div className="shimmer aspect-[4/3]" />
+    <div className="space-y-2 p-4"><div className="shimmer h-3 w-1/3 rounded-full" /><div className="shimmer h-5 w-3/4 rounded-full" /><div className="shimmer h-3 w-1/2 rounded-full" /></div>
+  </div>
+);
+```
+Stagger the grid by giving each card `transition={{ delay: index * 0.04 }}` on its entrance (`initial={{opacity:0,y:20}} animate={{opacity:1,y:0}}`).
+
+### CategoryChips.tsx (sliding active pill)
+```tsx
+export function CategoryChips({ value, onChange, items }: any) {
+  return (
+    <LayoutGroup id="chips">
+      <div className="no-scrollbar flex gap-2 overflow-x-auto py-2">
+        {items.map((c: string) => (
+          <button key={c} onClick={() => onChange(c)} className="relative shrink-0 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-bold">
+            {value === c && <motion.span layoutId="chip" className="absolute inset-0 rounded-full bg-[var(--blue)]" transition={{ type: 'spring', stiffness: 400, damping: 32 }} />}
+            <span className={`relative ${value === c ? 'text-white' : 'text-[var(--navy)]'}`}>{c}</span>
+          </button>
+        ))}
+      </div>
+    </LayoutGroup>
+  );
+}
+```
+
+### Toasts.tsx
+```tsx
+import { createContext, useCallback, useContext, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+const ToastCtx = createContext<(m: string, t?: 'ok' | 'error') => void>(() => {});
+export const useToast = () => useContext(ToastCtx);
+
+export function ToastProvider({ children }: any) {
+  const [list, setList] = useState<any[]>([]);
+  const push = useCallback((m: string, t: 'ok' | 'error' = 'ok') => {
+    const id = Date.now() + Math.random();
+    setList((l) => [...l, { id, m, t }]);
+    setTimeout(() => setList((l) => l.filter((x) => x.id !== id)), 3500);
+  }, []);
+  return (
+    <ToastCtx.Provider value={push}>
+      {children}
+      <div aria-live="polite" className="fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2 lg:bottom-6 lg:left-auto lg:right-6 lg:translate-x-0 lg:items-end">
+        <AnimatePresence>
+          {list.map((x) => (
+            <motion.div key={x.id} layout initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, x: 40 }}
+              className={`rounded-2xl px-5 py-3 text-sm font-bold text-white shadow-xl ${x.t === 'error' ? 'bg-[var(--danger)]' : 'bg-[var(--navy)]'}`}>
+              {x.t === 'error' ? '⚠️' : '✓'} {x.m}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </ToastCtx.Provider>
+  );
+}
+```
+
+### Sheet.tsx (modal on desktop, bottom sheet on mobile)
+```tsx
+import { useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-react';
+export function Sheet({ open, onClose, children }: any) {
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k);
+  }, [onClose]);
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div className="fixed inset-0 z-50 grid items-end bg-[var(--navy)]/50 sm:place-items-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
+          <motion.div role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}
+            initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="relative max-h-[92vh] w-full overflow-y-auto rounded-t-[32px] bg-[var(--cream)] p-6 sm:max-w-xl sm:rounded-[32px]">
+            <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-[var(--line)] sm:hidden" />
+            <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white"><X className="h-5 w-5" /></button>
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+```
+
+### Stepper.tsx (animated request progress)
+```tsx
+const steps = ['Requested', 'Approved', 'Picked up', 'Returned', 'Complete'];
+const idx: any = { pending: 0, approved: 1, active: 2, return_requested: 3, completed: 4 };
+export function Stepper({ status }: { status: string }) {
+  const cur = idx[status] ?? 0;
+  if (status === 'rejected' || status === 'cancelled')
+    return <p className="text-sm font-bold text-[var(--danger)]">{status === 'rejected' ? 'Not approved this time' : 'Request cancelled'}</p>;
+  return (
+    <div className="relative flex justify-between">
+      <div className="absolute left-7 right-7 top-[13px] h-1 rounded-full bg-[var(--line)]">
+        <motion.div className="h-full rounded-full bg-[var(--blue)]" initial={{ width: 0 }} animate={{ width: `${(cur / (steps.length - 1)) * 100}%` }} transition={{ duration: 0.6, ease: 'easeOut' }} />
+      </div>
+      {steps.map((s, i) => (
+        <div key={s} className="relative z-10 flex w-14 flex-col items-center gap-1 text-center">
+          <motion.span animate={{ scale: i === cur ? 1.15 : 1 }}
+            className={`grid h-7 w-7 place-items-center rounded-full border-2 text-xs font-extrabold ${i <= cur ? 'border-[var(--blue)] bg-[var(--blue)] text-white' : 'border-[var(--line)] bg-white text-[var(--muted)]'}`}>
+            {i < cur ? '✓' : i + 1}
+          </motion.span>
+          <span className="text-[10px] font-bold leading-tight">{s}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### LoopBurst.tsx (celebration when a return is confirmed; show for about 1.6s)
+```tsx
+export function LoopBurst({ show }: { show: boolean }) {
+  const colors = ['#0B57F0', '#F5811F', '#FFC531'];
+  return (
+    <AnimatePresence>
+      {show && (
+        <div className="pointer-events-none fixed inset-0 z-[60] grid place-items-center">
+          {Array.from({ length: 18 }).map((_, i) => {
+            const a = (i / 18) * Math.PI * 2;
+            return <motion.span key={i} className="absolute h-3 w-3 rounded-full" style={{ background: colors[i % 3] }}
+              initial={{ x: 0, y: 0, opacity: 1, scale: 1 }} animate={{ x: Math.cos(a) * 170, y: Math.sin(a) * 170, opacity: 0, scale: 0.4 }} transition={{ duration: 0.9, ease: 'easeOut' }} />;
+          })}
+          <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }} className="rounded-3xl bg-white px-8 py-6 text-center shadow-2xl">
+            <p className="text-2xl font-extrabold">Loop complete 🎉</p>
+            <p className="text-sm font-medium text-[var(--muted)]">Item home, neighbor happy.</p>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
+```
+
+## 12. DEMO FLOW THAT MUST WORK PERFECTLY
+1. Open Discover, watch the ribbons draw in, browse the seeded items, search "drill".
+2. Open the drill, continue as Jordan (demo button), request it for a date range.
+3. Switch to Alex via the avatar menu, open Activity > Incoming requests, approve it.
+4. Switch to Jordan, see the approved request. Click I picked it up, then Request return confirmation.
+5. Switch to Alex and click Confirm item returned. The loop celebration plays.
+6. Open Impact and watch the numbers count up with the new values.
+7. Request overlapping dates on an approved item and confirm the friendly clash message appears.
+
+## 13. DELIVERABLE
+Produce the complete app so it runs immediately, using the component code above. After building, double-check the flows above for errors and fix anything broken before finishing. Briefly list any limitation at the end.
+
+---COPY TO HERE---
+
+## If AI Studio needs a nudge
+- **Not bold enough:** "Make the hero headline bigger (text-7xl on desktop), thicken the ribbons, and make the yellow wave fill more of the hero."
+- **Animations missing:** "Add the framer-motion components exactly as given: sliding nav pill, card hover lift, staggered grid, animated stepper, CountUp on Impact, LoopBurst on return confirmed."
+- **Mobile issues:** "Test at 360px. Fix horizontal overflow, keep the bottom tab bar fixed with the raised orange + button, and turn modals into bottom sheets."
+- **Build error on a library:** "Install framer-motion and lucide-react, and use `any` types to resolve TypeScript errors."
