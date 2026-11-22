@@ -31,9 +31,9 @@ Most households own dozens of high-utility items—power drills, extension ladde
 
 ---
 
-## 2-Minute Judge Walkthrough
+## 2-Minute Walkthrough
 
-ShareShelf includes two instant demo accounts so judges can experience **both sides** of a borrow exchange without manual registration:
+ShareShelf includes two instant demo accounts so you can experience **both sides** of a borrow exchange without manual registration:
 
 | Persona | Neighborhood | Role in Demo | Credentials (if typing manually) |
 | :--- | :--- | :--- | :--- |
