@@ -32,6 +32,9 @@ function readProcessEnv(name: string): string {
   return '';
 }
 
+const DEFAULT_PUBLIC_SUPABASE_URL = 'https://wxilcjhelvfjdqqbwrdx.supabase.co';
+const DEFAULT_PUBLIC_SUPABASE_ANON_KEY = 'sb_publishable_76N8WvSHMotSgpxUOoMxUA_cwNHg0Ic';
+
 export function getSupabaseConfig(): SupabaseConfig {
   const staticViteUrl =
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || '';
@@ -58,13 +61,17 @@ export function getSupabaseConfig(): SupabaseConfig {
     const localUrl = localStorage.getItem(STORAGE_URL_KEY)?.trim() || '';
     const localKey = localStorage.getItem(STORAGE_ANON_KEY)?.trim() || '';
     if (localUrl && localKey) {
-      return { url: localUrl, anonKey: localKey, source: 'localStorage' };
+      return { url: normalizeSupabaseUrl(localUrl), anonKey: localKey, source: 'localStorage' };
     }
   } catch {
     // ignore localStorage errors
   }
 
-  return { url: '', anonKey: '', source: 'none' };
+  return {
+    url: DEFAULT_PUBLIC_SUPABASE_URL,
+    anonKey: DEFAULT_PUBLIC_SUPABASE_ANON_KEY,
+    source: 'env',
+  };
 }
 
 export function isSupabaseConfigured(): boolean {

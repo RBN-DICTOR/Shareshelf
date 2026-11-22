@@ -49,17 +49,19 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
     }
   };
 
+  const safeItems = useMemo(() => (Array.isArray(items) ? items : []), [items]);
+
   const neighborhoods = useMemo(() => {
     const set = new Set<string>();
-    items.forEach((it) => {
+    safeItems.forEach((it) => {
       if (it.neighborhood?.trim()) set.add(it.neighborhood.trim());
     });
     return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [items]);
+  }, [safeItems]);
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return items.filter((item) => {
+    return safeItems.filter((item) => {
       if (selectedCategory !== 'All' && item.category !== selectedCategory) {
         return false;
       }
@@ -78,7 +80,7 @@ export function DiscoverPage({ onOpenShareModal }: DiscoverPageProps) {
       }
       return true;
     });
-  }, [items, busyDates, search, selectedCategory, selectedNeighborhood, availableOnly]);
+  }, [safeItems, busyDates, search, selectedCategory, selectedNeighborhood, availableOnly]);
 
   const hasActiveFilters =
     Boolean(search.trim()) ||

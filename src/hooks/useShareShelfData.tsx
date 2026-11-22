@@ -132,8 +132,8 @@ export function ShareShelfDataProvider({
   const loadPublicData = useCallback(async () => {
     try {
       const [itemsData, busyData] = await Promise.all([fetchItems(), fetchBusyDates()]);
-      setItems(itemsData);
-      setBusyDates(busyData);
+      setItems(Array.isArray(itemsData) ? itemsData : []);
+      setBusyDates(Array.isArray(busyData) ? busyData : []);
       setSchemaMissing(false);
     } catch (err) {
       const code = (err as { code?: string })?.code || '';
@@ -155,7 +155,7 @@ export function ShareShelfDataProvider({
   const loadWantsData = useCallback(async () => {
     try {
       const wantsData = await fetchItemWants();
-      setWants(wantsData);
+      setWants(Array.isArray(wantsData) ? wantsData : []);
     } catch (err) {
       logDebugError('loadWantsData', err);
     } finally {
@@ -187,8 +187,8 @@ export function ShareShelfDataProvider({
         fetchBorrowRequestsForUser(user.id),
         fetchNotifications(user.id),
       ]);
-      setRequests(reqs);
-      setNotifications(notifs);
+      setRequests(Array.isArray(reqs) ? reqs : []);
+      setNotifications(Array.isArray(notifs) ? notifs : []);
     } catch (err) {
       logDebugError('loadUserData', err);
     } finally {

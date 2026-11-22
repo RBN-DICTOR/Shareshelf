@@ -36,11 +36,14 @@ async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers,
   });
 
+  const contentType = res.headers.get('content-type') || '';
   const text = await res.text();
   let data: unknown = null;
+  let parsedAsJson = false;
   if (text) {
     try {
       data = JSON.parse(text);
+      parsedAsJson = true;
     } catch {
       data = { error: text };
     }
@@ -50,6 +53,10 @@ async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
     const errMsg =
       (data as { error?: string } | null)?.error || `Request failed (${res.status})`;
     throw new Error(errMsg);
+  }
+
+  if (text && (!parsedAsJson || contentType.includes('text/html'))) {
+    throw new Error('Backend API is unavailable on this host.');
   }
 
   return data as T;
